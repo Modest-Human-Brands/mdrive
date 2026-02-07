@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.6.1
+
+[compare changes](https://github.com/algostract/unmedia/compare/v0.6.0...v0.6.1)
+
+### 🏡 Chore
+
+- Update dependencies and package manager version; remove unused cache deletion API ([16afee0](https://github.com/algostract/unmedia/commit/16afee0))
+
+### ❤️ Contributors
+
+- Shirsendu Bairagi ([@shba007](https://github.com/shba007))
+
 ## v0.6.0
 
 [compare changes](https://github.com/algostract/unmedia/compare/v0.5.10...v0.6.0)
