@@ -3,23 +3,20 @@ FROM oven/bun:1-alpine AS builder
 WORKDIR /app
 
 COPY package.json bun.lock ./
-COPY nuxt.config.ts ./
-
-ENV NITRO_PRESET=bun
-ENV NUXT_PUBLIC_SITE_URL=$SITE_URL
 
 RUN bun install --frozen-lockfile
 
 COPY . .
 
-RUN bun run build
+RUN bunx motia build
+
+FROM debian:bookworm-slim AS iii-installer
+
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates && rm -rf /var/lib/apt/lists/*
+
+RUN curl -fsSL https://install.iii.dev/iii/main/install.sh | bash
 
 FROM oven/bun:1-alpine AS runner
-
-ARG VERSION
-ARG BUILD_TIME
-
-WORKDIR /app
 
 RUN apk add --no-cache \
   --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main \
@@ -28,12 +25,17 @@ RUN apk add --no-cache \
 
 RUN apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/testing steghide
 
-COPY --from=builder /app/.output ./.output
+WORKDIR /app
 
-ENV NODE_ENV=production
-ENV NUXT_APP_VERSION=$VERSION
-ENV NUXT_APP_BUILD_TIME=$BUILD_TIME
+COPY --from=iii-installer /root/.local/bin/iii /usr/local/bin/iii
 
-EXPOSE 3000
+COPY --from=builder /app/package.json .
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
+COPY iii-config-production.yaml .
 
-ENTRYPOINT ["bun", ".output/server/index.mjs"]
+EXPOSE 3111
+EXPOSE 3112
+EXPOSE 49134
+
+CMD ["iii", "--config", "iii-config-production.yaml"]

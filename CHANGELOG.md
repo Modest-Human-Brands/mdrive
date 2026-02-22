@@ -2,11 +2,11 @@
 
 ## v0.6.1
 
-[compare changes](https://github.com/algostract/unmedia/compare/v0.6.0...v0.6.1)
+[compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.6.0...v0.6.1)
 
 ### 🏡 Chore
 
-- Update dependencies and package manager version; remove unused cache deletion API ([16afee0](https://github.com/algostract/unmedia/commit/16afee0))
+- Update dependencies and package manager version; remove unused cache deletion API ([16afee0](https://github.com/Modest-Human-Brands/mdrive/commit/16afee0))
 
 ### ❤️ Contributors
 
@@ -14,21 +14,21 @@
 
 ## v0.6.0
 
-[compare changes](https://github.com/algostract/unmedia/compare/v0.5.10...v0.6.0)
+[compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.5.10...v0.6.0)
 
 ### 🚀 Enhancements
 
-- Enhance media processing with adaptive bitrate ([12b57fd](https://github.com/algostract/unmedia/commit/12b57fd))
-- ⚠️ Add Adaptive Bitrate feature to README ([e7fa35a](https://github.com/algostract/unmedia/commit/e7fa35a))
+- Enhance media processing with adaptive bitrate ([12b57fd](https://github.com/Modest-Human-Brands/mdrive/commit/12b57fd))
+- ⚠️ Add Adaptive Bitrate feature to README ([e7fa35a](https://github.com/Modest-Human-Brands/mdrive/commit/e7fa35a))
 
 ### 🤖 CI
 
-- **release:** Update version ([e977d80](https://github.com/algostract/unmedia/commit/e977d80))
-- **release:** Update version ([04fb60e](https://github.com/algostract/unmedia/commit/04fb60e))
+- **release:** Update version ([e977d80](https://github.com/Modest-Human-Brands/mdrive/commit/e977d80))
+- **release:** Update version ([04fb60e](https://github.com/Modest-Human-Brands/mdrive/commit/04fb60e))
 
 #### ⚠️ Breaking Changes
 
-- ⚠️ Add Adaptive Bitrate feature to README ([e7fa35a](https://github.com/algostract/unmedia/commit/e7fa35a))
+- ⚠️ Add Adaptive Bitrate feature to README ([e7fa35a](https://github.com/Modest-Human-Brands/mdrive/commit/e7fa35a))
 
 ### ❤️ Contributors
 
@@ -37,11 +37,11 @@
 
 ## v0.5.11
 
-[compare changes](https://github.com/algostract/unmedia/compare/v0.5.10...v0.5.11)
+[compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.5.10...v0.5.11)
 
 ### 🚀 Enhancements
 
-- Enhance media processing with adaptive bitrate ([12b57fd](https://github.com/algostract/unmedia/commit/12b57fd))
+- Enhance media processing with adaptive bitrate ([12b57fd](https://github.com/Modest-Human-Brands/mdrive/commit/12b57fd))
 
 ### ❤️ Contributors
 
@@ -49,19 +49,19 @@
 
 ## v0.5.10
 
-[compare changes](https://github.com/algostract/unmedia/compare/v0.5.9...v0.5.10)
+[compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.5.9...v0.5.10)
 
 ### 🚀 Enhancements
 
-- Add media management API and update project structure ([a2596ca](https://github.com/algostract/unmedia/commit/a2596ca))
+- Add media management API and update project structure ([a2596ca](https://github.com/Modest-Human-Brands/mdrive/commit/a2596ca))
 
 ### 🩹 Fixes
 
-- Implement sheet component structure and media API enhancements ([4240f78](https://github.com/algostract/unmedia/commit/4240f78))
-- Add Skeleton component with template and props ([06af570](https://github.com/algostract/unmedia/commit/06af570))
-- Add Separator component with template and props ([14531d5](https://github.com/algostract/unmedia/commit/14531d5))
-- Add Input component with template and props ([e65bec2](https://github.com/algostract/unmedia/commit/e65bec2))
-- Add Tooltip component with structure and props ([78e2874](https://github.com/algostract/unmedia/commit/78e2874))
+- Implement sheet component structure and media API enhancements ([4240f78](https://github.com/Modest-Human-Brands/mdrive/commit/4240f78))
+- Add Skeleton component with template and props ([06af570](https://github.com/Modest-Human-Brands/mdrive/commit/06af570))
+- Add Separator component with template and props ([14531d5](https://github.com/Modest-Human-Brands/mdrive/commit/14531d5))
+- Add Input component with template and props ([e65bec2](https://github.com/Modest-Human-Brands/mdrive/commit/e65bec2))
+- Add Tooltip component with structure and props ([78e2874](https://github.com/Modest-Human-Brands/mdrive/commit/78e2874))
 
 ### ❤️ Contributors
 

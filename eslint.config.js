@@ -1,13 +1,11 @@
-// @ts-check
-import withNuxt from './.nuxt/eslint.config.mjs'
+// eslint.config.js
+import { defineConfig } from 'eslint/config'
 
-export default withNuxt([
-  {
-    ignores: ['**/src-tauri/**'],
-  },
+export default defineConfig([
   {
     rules: {
-      'vue/html-self-closing': 'off',
+      semi: 'error',
+      'prefer-const': 'error',
     },
   },
 ])

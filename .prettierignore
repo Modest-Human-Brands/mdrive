@@ -26,5 +26,5 @@ logs
 .env*
 !.env.example
 
-# Tauri files
-src-tauri
+static
+temp
