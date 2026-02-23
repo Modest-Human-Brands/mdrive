@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.7.2
+
+[compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.7.1...v0.7.2)
+
+### 🩹 Fixes
+
+- Update FFmpeg arguments to handle optional audio streams ([5916d38](https://github.com/Modest-Human-Brands/mdrive/commit/5916d38))
+
+### ❤️ Contributors
+
+- Shirsendu Bairagi ([@shba007](https://github.com/shba007))
+
 ## v0.7.1
 
 [compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.7.0...v0.7.1)
