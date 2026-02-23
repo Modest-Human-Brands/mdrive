@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.7.1
+
+[compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.7.0...v0.7.1)
+
+### 💅 Refactors
+
+- Replace hardcoded RTMP_BASE_URL with environment variable ([14e346c](https://github.com/Modest-Human-Brands/mdrive/commit/14e346c))
+
+### ❤️ Contributors
+
+- Shirsendu Bairagi ([@shba007](https://github.com/shba007))
+
 ## v0.7.0
 
 [compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.6.1...v0.7.0)
