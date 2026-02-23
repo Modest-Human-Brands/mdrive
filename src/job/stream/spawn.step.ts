@@ -82,7 +82,23 @@ function buildFFmpegArgsForCodec(streamKey: string, deviceId: string, deviceDir:
   const args: string[] = ['-listen', '1', '-i', `${import.meta.env.MOTIA_RTMP_BASE_URL}/live/${streamKey}/${deviceId}`]
 
   if (includeOriginal) {
-    args.push('-map', '0', '-c', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', join(deviceDir, 'original', `recording-${Date.now()}.mp4`))
+    args.push(
+      '-map',
+      '0:v',
+      '-map',
+      '0:a?',
+      '-c:v',
+      'libx264',
+      '-preset',
+      'veryfast',
+      '-c:a',
+      'aac',
+      '-f',
+      'mp4',
+      '-movflags',
+      '+frag_keyframe+empty_moov+default_base_moof',
+      join(deviceDir, 'original', `recording-${Date.now()}.mp4`)
+    )
   }
 
   const { encoder, preset, tune, segExt, hlsSegType } = {
@@ -99,7 +115,7 @@ function buildFFmpegArgsForCodec(streamKey: string, deviceId: string, deviceDir:
       '-map',
       '0:v',
       '-map',
-      '0:a',
+      '0:a?',
       '-vf',
       vf,
       '-c:v',
