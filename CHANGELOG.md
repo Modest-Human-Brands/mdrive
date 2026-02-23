@@ -1,5 +1,27 @@
 # Changelog
 
+## v0.7.0
+
+[compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.6.1...v0.7.0)
+
+### 🚀 Enhancements
+
+- ⚠️ Migrated from nuxt to motia as micro service ([56ab336](https://github.com/Modest-Human-Brands/mdrive/commit/56ab336))
+- ⚠️ Added sync streaming ([2a1ad1c](https://github.com/Modest-Human-Brands/mdrive/commit/2a1ad1c))
+
+### 🏡 Chore
+
+- Update ESLint configuration and dependencies ([a18dc8f](https://github.com/Modest-Human-Brands/mdrive/commit/a18dc8f))
+
+#### ⚠️ Breaking Changes
+
+- ⚠️ Migrated from nuxt to motia as micro service ([56ab336](https://github.com/Modest-Human-Brands/mdrive/commit/56ab336))
+- ⚠️ Added sync streaming ([2a1ad1c](https://github.com/Modest-Human-Brands/mdrive/commit/2a1ad1c))
+
+### ❤️ Contributors
+
+- Shirsendu Bairagi ([@shba007](https://github.com/shba007))
+
 ## v0.6.1
 
 [compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.6.0...v0.6.1)
