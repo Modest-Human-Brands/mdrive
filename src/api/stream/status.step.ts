@@ -4,8 +4,6 @@ import { readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { corsMiddleware } from 'src/middleware/cors.middleware'
 
-import { RTMP_BASE_URL } from './start.step'
-
 export const config = {
   name: 'StreamStatus',
   description: 'List all active HLS streams',
@@ -44,7 +42,7 @@ export const handler: Handlers<typeof config> = async (_req, { logger }) => {
           return deviceIds.map((deviceId) => ({
             slug: `${streamKey}-${deviceId}`,
             title: 'True Mens Product Photo Shoot Stream',
-            rtmpUrl: `${RTMP_BASE_URL}/live/${streamKey}/${deviceId}`,
+            rtmpUrl: `${import.meta.env.MOTIA_RTMP_BASE_URL}/live/${streamKey}/${deviceId}`,
             media: `stream/${streamKey}/${deviceId}/hls/master.m3u8`,
             poster: 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=400&q=80',
             streamKey,

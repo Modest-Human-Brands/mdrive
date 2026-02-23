@@ -2,8 +2,6 @@ import { http, type Handlers, type StepConfig } from 'motia'
 import { corsMiddleware } from 'src/middleware/cors.middleware'
 import { z } from 'zod'
 
-export const RTMP_BASE_URL = 'rtmp://localhost:1935'
-
 export const config = {
   name: 'StreamStart',
   description: 'Start an HLS stream from RTMP input',
@@ -41,7 +39,7 @@ export const handler: Handlers<typeof config> = async ({ body }, { enqueue, logg
     body: {
       streamKey,
       deviceId,
-      rtmpUrl: `${RTMP_BASE_URL}/live/${streamKey}/${deviceId}`,
+      rtmpUrl: `${import.meta.env.MOTIA_RTMP_BASE_URL}/live/${streamKey}/${deviceId}`,
       hlsUrl: `stream/${streamKey}/${deviceId}/hls/master.m3u8`,
     },
   }

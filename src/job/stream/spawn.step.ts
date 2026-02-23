@@ -3,7 +3,6 @@ import { z } from 'zod'
 import { execa } from 'execa'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { RTMP_BASE_URL } from '../../api/stream/start.step'
 
 const renditionSchema = z.object({
   name: z.string(),
@@ -80,7 +79,7 @@ export const config = {
 const processes = new Map<string, ReturnType<typeof execa>>()
 
 function buildFFmpegArgsForCodec(streamKey: string, deviceId: string, deviceDir: string, renditions: Rendition[], codec: Codec, includeOriginal: boolean): string[] {
-  const args: string[] = ['-listen', '1', '-i', `${RTMP_BASE_URL}/live/${streamKey}/${deviceId}`]
+  const args: string[] = ['-listen', '1', '-i', `${import.meta.env.MOTIA_RTMP_BASE_URL}/live/${streamKey}/${deviceId}`]
 
   if (includeOriginal) {
     args.push('-map', '0', '-c', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', join(deviceDir, 'original', `recording-${Date.now()}.mp4`))
