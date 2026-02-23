@@ -1,4 +1,4 @@
-import type { Handlers, StepConfig } from 'motia'
+import { http, type Handlers, type StepConfig } from 'motia'
 import { z } from 'zod'
 import mime from 'mime-types'
 import { createStorage } from 'unstorage'
@@ -12,12 +12,9 @@ export const config = {
   description: 'Get a Media',
   flows: ['get-media-flow'],
   triggers: [
-    {
-      type: 'http',
-      method: 'GET',
-      path: '/media/[id]',
+    http('GET', '/media/[id]', {
       responseSchema: { 200: z.array(z.object({ slug: z.string(), type: z.string() })) },
-    },
+    }),
   ],
   enqueues: [],
 } as const satisfies StepConfig

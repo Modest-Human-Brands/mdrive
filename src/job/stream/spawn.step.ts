@@ -1,9 +1,9 @@
-import type { Handlers, StepConfig } from 'motia'
+import { queue, type Handlers, type StepConfig } from 'motia'
 import { z } from 'zod'
 import { execa } from 'execa'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { RTMP_BASE_URL } from './start.step'
+import { RTMP_BASE_URL } from '../../api/stream/start.step'
 
 const renditionSchema = z.object({
   name: z.string(),
@@ -62,16 +62,14 @@ export const config = {
   description: 'Spawn FFmpeg for multi-device, multi-resolution, multi-codec HLS streaming',
   flows: ['live-stream'],
   triggers: [
-    {
-      type: 'queue',
-      topic: 'stream.spawn',
+    queue('stream.spawn', {
       input: z.object({
         streamKey: z.string(),
         deviceId: z.string(),
         renditions: z.array(renditionSchema).optional(),
         codecs: z.array(codecSchema).optional(),
       }),
-    },
+    }),
   ],
   enqueues: [
     { topic: 'stream.ready', label: 'Stream is live' },

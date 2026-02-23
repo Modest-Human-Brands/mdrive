@@ -1,4 +1,4 @@
-import type { Handlers, StepConfig } from 'motia'
+import { http, type Handlers, type StepConfig } from 'motia'
 import { z } from 'zod'
 
 export const config = {
@@ -6,16 +6,13 @@ export const config = {
   description: 'Return Health Status',
   flows: ['health-check-flow'],
   triggers: [
-    {
-      type: 'http',
-      method: 'GET',
-      path: '/health',
+    http('GET', '/health', {
       responseSchema: {
         200: z.object({
           status: z.string(),
         }),
       },
-    },
+    }),
   ],
   enqueues: [],
 } as const satisfies StepConfig

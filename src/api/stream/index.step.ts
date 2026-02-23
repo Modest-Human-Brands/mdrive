@@ -1,4 +1,4 @@
-import type { Handlers, StepConfig } from 'motia'
+import { http, type Handlers, type StepConfig } from 'motia'
 import { z } from 'zod'
 
 export const config = {
@@ -6,13 +6,10 @@ export const config = {
   description: 'Upload Stream to R2 Bucket',
   flows: ['upload-stream'],
   triggers: [
-    {
-      type: 'http',
-      method: 'POST',
-      path: '/stream',
+    http('POST', '/stream', {
       bodySchema: z.object({ path: z.string(), file: z.string() }),
       responseSchema: { 200: z.object({ status: z.string() }) },
-    },
+    }),
   ],
   enqueues: [],
 } as const satisfies StepConfig
