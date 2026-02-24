@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.7.3
+
+[compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.7.2...v0.7.3)
+
+### 🏡 Chore
+
+- Update environment variables and modify flow names for streaming API ([a0d3d87](https://github.com/Modest-Human-Brands/mdrive/commit/a0d3d87))
+
+### ❤️ Contributors
+
+- Shirsendu Bairagi ([@shba007](https://github.com/shba007))
+
 ## v0.7.2
 
 [compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.7.1...v0.7.2)
