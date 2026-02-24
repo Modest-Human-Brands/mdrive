@@ -7,7 +7,7 @@ import { corsMiddleware } from 'src/middleware/cors.middleware'
 export const config = {
   name: 'StreamStatus',
   description: 'List all active HLS streams',
-  flows: ['live-stream'],
+  flows: ['live-stream-flow'],
   triggers: [
     http('GET', '/stream/status', {
       responseSchema: {

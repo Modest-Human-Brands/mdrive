@@ -4,7 +4,7 @@ import { z } from 'zod'
 export const config = {
   name: 'StreamUpload',
   description: 'Upload Stream to R2 Bucket',
-  flows: ['upload-stream'],
+  flows: ['live-stream-flow'],
   triggers: [
     http('POST', '/stream', {
       bodySchema: z.object({ path: z.string(), file: z.string() }),

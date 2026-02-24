@@ -59,7 +59,7 @@ const CODEC_HLS_FORMAT: Record<Codec, { segExt: string; hlsSegType: string }> = 
 export const config = {
   name: 'StreamSpawn',
   description: 'Spawn FFmpeg for multi-device, multi-resolution, multi-codec HLS streaming',
-  flows: ['live-stream'],
+  flows: ['live-stream-flow'],
   triggers: [
     queue('stream.spawn', {
       input: z.object({

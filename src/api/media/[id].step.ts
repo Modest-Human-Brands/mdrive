@@ -10,7 +10,7 @@ const fs = createStorage(/* opts */)
 export const config = {
   name: 'MediaGet',
   description: 'Get a Media',
-  flows: ['get-media-flow'],
+  flows: ['live-stream-flow'],
   triggers: [
     http('GET', '/media/[id]', {
       responseSchema: { 200: z.array(z.object({ slug: z.string(), type: z.string() })) },

@@ -5,7 +5,7 @@ import { z } from 'zod'
 export const config = {
   name: 'StreamStart',
   description: 'Start an HLS stream from RTMP input',
-  flows: ['live-stream'],
+  flows: ['live-stream-flow'],
   triggers: [
     http('POST', '/stream/start', {
       bodySchema: z.object({ streamKey: z.string(), deviceId: z.string() }),
