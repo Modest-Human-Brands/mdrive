@@ -1,42 +1,60 @@
 import { http, type Handlers, type StepConfig } from 'motia'
 import { z } from 'zod'
-import mime from 'mime-types'
-import { createStorage } from 'unstorage'
+import syncDrive from '../../utils/sync-drive'
 
-import syncDrive from 'src/utils/sync-drive'
-
-const fs = createStorage(/* opts */)
+const mediaSchema = z.object({
+  slug: z.string(),
+  type: z.enum(['photo', 'video']),
+  title: z.string(),
+  thumbnailUrl: z.string(),
+  metadata: z.object({
+    size: z.number(),
+    bitDepth: z.string(),
+    resolution: z.string(),
+    fps: z.number().optional(),
+  }),
+})
 
 export const config = {
-  name: 'MediaGet',
-  description: 'Get a Media',
-  flows: ['live-stream-flow'],
+  name: 'MediaGetOne',
+  description: 'Get a single media item by slug',
+  flows: ['get-media'],
   triggers: [
-    http('GET', '/media/[id]', {
-      responseSchema: { 200: z.array(z.object({ slug: z.string(), type: z.string() })) },
+    http('GET', '/media/:slug', {
+      responseSchema: {
+        200: mediaSchema,
+        404: z.object({ error: z.string() }),
+      },
     }),
   ],
   enqueues: [],
 } as const satisfies StepConfig
 
-export const handler: Handlers<typeof config> = async (_, { logger }) => {
-  const { id } = await getValidatedRouterParams(
-    event,
-    z.object({
-      id: z.string().min(1),
-    }).parse
-  )
+export const handler: Handlers<typeof config> = async ({ pathParams }, { logger }) => {
+  const { slug } = pathParams
 
-  const mediaOriginId = (await syncDrive())[id]
+  logger.info('Fetching media', { slug })
 
-  const mediaId = encodeURI(mediaOriginId).replaceAll('/', '_')
-  const source = `./source/${mediaId}`
-  // check if file already exists
-  if (!(await fs.hasItem(source))) {
-    const { stream } = await r2GetFileStream(encodeURI(mediaOriginId), 'origin', config.private.cloudreveR2Endpoint, config.private.cloudreveR2Bucket) // Web ReadableStream<Uint8Array>
-    await stream.pipeTo(Writable.toWeb(createWriteStream(`./static/${source}`)))
+  const data = await syncDrive()
+  const entry = Object.entries(data).find(([key]) => key === slug)
+
+  if (!entry) return { status: 404, body: { error: `Media not found: ${slug}` } }
+
+  const [key, value] = entry
+
+  return {
+    status: 200,
+    body: {
+      slug: key,
+      type: key.startsWith('video-') ? 'video' : 'photo',
+      title: key,
+      thumbnailUrl: `${import.meta.env.MOTIA_DRIVE_R2_PUBLIC_URL}/${value}._thumb`,
+      metadata: {
+        size: 22,
+        bitDepth: '10 bit',
+        resolution: '1080p',
+        fps: key.startsWith('video-') ? 30 : undefined,
+      },
+    },
   }
-
-  const metaData = `${mime.lookup(mediaId)}`.includes('image') ? await getImageMetadata(`./static/${source}`) : await getVideoMetadata(`./static/${source}`)
-  return metaData
 }

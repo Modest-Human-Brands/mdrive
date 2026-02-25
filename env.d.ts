@@ -11,7 +11,8 @@ interface ImportMetaEnv {
   readonly MOTIA_DRIVE_R2_REGION: string
   readonly MOTIA_DRIVE_R2_PUBLIC_URL: string
 
-  readonly MOTIA_RTMP_BASE_URL: string
+  readonly MOTIA_SRT_HOST: string
+  readonly MOTIA_SRT_PORT: string
 }
 
 interface ImportMeta {

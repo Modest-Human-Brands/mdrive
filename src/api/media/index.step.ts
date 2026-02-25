@@ -5,7 +5,7 @@ import syncDrive from 'src/utils/sync-drive'
 export const config = {
   name: 'MediaGetAll',
   description: 'Get all Media',
-  flows: ['live-stream-flow'],
+  flows: ['get-media'],
   triggers: [
     http('GET', '/media', {
       responseSchema: { 200: z.array(z.object({ slug: z.string(), type: z.string() })) },

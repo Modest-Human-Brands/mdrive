@@ -1,35 +1,33 @@
 import { http, type Handlers, type StepConfig } from 'motia'
-import { corsMiddleware } from 'src/middleware/cors.middleware'
 import { z } from 'zod'
 
 export const config = {
   name: 'StreamStart',
-  description: 'Start an HLS stream from RTMP input',
+  description: 'Start an HLS stream from SRT input',
   flows: ['live-stream-flow'],
   triggers: [
     http('POST', '/stream/start', {
-      bodySchema: z.object({ streamKey: z.string(), deviceId: z.string() }),
+      bodySchema: z.object({ slug: z.string(), deviceId: z.string() }),
       responseSchema: {
-        200: z.object({ streamKey: z.string(), rtmpUrl: z.string(), hlsUrl: z.string() }),
+        200: z.object({ slug: z.string(), streamUrl: z.string(), hlsUrl: z.string() }),
         400: z.object({ error: z.string() }),
       },
-      middleware: [corsMiddleware],
     }),
   ],
-  enqueues: [{ topic: 'stream.spawn', label: 'Spawn FFmpeg process' }],
+  enqueues: [{ topic: 'stream.process', label: 'Process using FFmpeg' }],
 } as const satisfies StepConfig
 
 export const handler: Handlers<typeof config> = async ({ body }, { enqueue, logger }) => {
-  const { streamKey, deviceId } = body
+  const { slug, deviceId } = body
 
-  if (!streamKey) return { status: 400, body: { error: 'streamKey required' } }
+  if (!slug) return { status: 400, body: { error: 'slug required' } }
 
-  logger.info(`Starting stream: ${streamKey} ${deviceId}`)
+  logger.info(`Starting stream: ${slug} ${deviceId}`)
 
   await enqueue({
-    topic: 'stream.spawn',
+    topic: 'stream.process',
     data: {
-      streamKey,
+      slug,
       deviceId,
     },
   })
@@ -37,10 +35,10 @@ export const handler: Handlers<typeof config> = async ({ body }, { enqueue, logg
   return {
     status: 200,
     body: {
-      streamKey,
+      slug,
       deviceId,
-      rtmpUrl: `${import.meta.env.MOTIA_RTMP_BASE_URL}/live/${streamKey}/${deviceId}`,
-      hlsUrl: `stream/${streamKey}/${deviceId}/hls/master.m3u8`,
+      streamUrl: `srt://${import.meta.env.MOTIA_SRT_HOST}:${import.meta.env.MOTIA_SRT_PORT}/live/${slug}/${deviceId}`,
+      hlsUrl: `stream/${slug}/${deviceId}/hls/master.m3u8`,
     },
   }
 }

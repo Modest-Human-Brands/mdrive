@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { execa } from 'execa'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import { deregisterProcess, hasProcess, registerProcess } from 'src/utils/stream-processes'
 
 const renditionSchema = z.object({
   name: z.string(),
@@ -57,13 +58,13 @@ const CODEC_HLS_FORMAT: Record<Codec, { segExt: string; hlsSegType: string }> = 
 }
 
 export const config = {
-  name: 'StreamSpawn',
-  description: 'Spawn FFmpeg for multi-device, multi-resolution, multi-codec HLS streaming',
+  name: 'StreamProcess',
+  description: 'Process using FFmpeg for multi-device, multi-resolution, multi-codec HLS streaming',
   flows: ['live-stream-flow'],
   triggers: [
-    queue('stream.spawn', {
+    queue('stream.process', {
       input: z.object({
-        streamKey: z.string(),
+        slug: z.string(),
         deviceId: z.string(),
         renditions: z.array(renditionSchema).optional(),
         codecs: z.array(codecSchema).optional(),
@@ -76,10 +77,8 @@ export const config = {
   ],
 } as const satisfies StepConfig
 
-const processes = new Map<string, ReturnType<typeof execa>>()
-
-function buildFFmpegArgsForCodec(streamKey: string, deviceId: string, deviceDir: string, renditions: Rendition[], codec: Codec, includeOriginal: boolean): string[] {
-  const args: string[] = ['-listen', '1', '-i', `${import.meta.env.MOTIA_RTMP_BASE_URL}/live/${streamKey}/${deviceId}`]
+function buildFFmpegArgsForCodec(slug: string, deviceId: string, deviceDir: string, renditions: Rendition[], codec: Codec, includeOriginal: boolean): string[] {
+  const args: string[] = ['-i', `srt://${import.meta.env.MOTIA_SRT_HOST}:${import.meta.env.MOTIA_SRT_PORT}?streamid=live/${slug}/${deviceId}&mode=listener&pkt_size=1316`]
 
   if (includeOriginal) {
     args.push(
@@ -165,10 +164,10 @@ async function writeMasterPlaylist(deviceDir: string, renditions: Rendition[], c
   await writeFile(join(deviceDir, 'hls', 'master.m3u8'), lines.join('\n'))
 }
 
-export const handler: Handlers<typeof config> = async ({ streamKey, deviceId }, { enqueue, logger }) => {
+export const handler: Handlers<typeof config> = async ({ slug, deviceId }, { enqueue, logger, state }) => {
   const renditions = DEFAULT_RENDITIONS
   const codecs = DEFAULT_CODECS
-  const deviceDir = join(process.cwd(), 'static', 'stream', streamKey, deviceId)
+  const deviceDir = join(process.cwd(), 'static', 'stream', slug, deviceId)
 
   await mkdir(join(deviceDir, 'original'), { recursive: true })
   for (const codec of codecs) {
@@ -179,15 +178,15 @@ export const handler: Handlers<typeof config> = async ({ streamKey, deviceId }, 
   await writeMasterPlaylist(deviceDir, renditions, codecs)
 
   for (const [index, codec] of codecs.entries()) {
-    const procKey = `${streamKey}:${deviceId}:${codec}`
+    const procKey = `${slug}:${deviceId}:${codec}`
 
-    if (processes.has(procKey)) {
+    if (hasProcess(procKey)) {
       logger.warn(`Stream ${procKey} already running, skipping`)
       continue
     }
 
     const args = buildFFmpegArgsForCodec(
-      streamKey,
+      slug,
       deviceId,
       deviceDir,
       renditions,
@@ -195,19 +194,19 @@ export const handler: Handlers<typeof config> = async ({ streamKey, deviceId }, 
       index === 0 // only first codec captures original recording
     )
 
-    logger.info(`Spawning FFmpeg [${codec}] for ${streamKey}:${deviceId} — ${renditions.length} renditions`)
+    logger.info(`Spawning FFmpeg [${codec}] for ${slug}:${deviceId} — ${renditions.length} renditions`)
 
     const proc = execa('ffmpeg', args, { reject: false })
     proc.stderr?.on('data', (d) => logger.info(`[ffmpeg:${procKey}] ${d.toString().trim()}`))
     proc.on('exit', async (code) => {
-      processes.delete(procKey)
+      deregisterProcess(procKey, state)
       logger.info(`[${procKey}] exited with code ${code}`)
-      await enqueue({ topic: 'stream.error', data: { streamKey, deviceId, codec, code } })
+      await enqueue({ topic: 'stream.error', data: { slug: slug, deviceId, codec, code } })
     })
-    processes.set(procKey, proc)
+    registerProcess(procKey, proc, { slug: slug, deviceId, codec }, state)
   }
 
-  await enqueue({ topic: 'stream.ready', data: { streamKey, deviceId } })
+  await enqueue({ topic: 'stream.ready', data: { slug: slug, deviceId } })
 
   return { status: 200, body: '' }
 }
