@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.7.4
+
+[compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.7.3...v0.7.4)
+
+### 🚀 Enhancements
+
+- **stream:** Implement HLS stream management and processing ([f112505](https://github.com/Modest-Human-Brands/mdrive/commit/f112505))
+
+### ❤️ Contributors
+
+- Shirsendu Bairagi ([@shba007](https://github.com/shba007))
+
 ## v0.7.3
 
 [compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.7.2...v0.7.3)
