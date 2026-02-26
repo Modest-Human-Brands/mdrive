@@ -22,9 +22,8 @@ export type Codec = z.infer<typeof codecSchema>
 
 export const DEFAULT_RENDITIONS: Rendition[] = [
   { name: '1080p', width: 1920, height: 1080, videoBitrate: '5000k', maxRate: '5500k', bufSize: '10000k', audioBitrate: '128k' },
-  { name: '720p', width: 1280, height: 720, videoBitrate: '2800k', maxRate: '3000k', bufSize: '6000k', audioBitrate: '128k' },
+  // { name: '720p', width: 1280, height: 720, videoBitrate: '2800k', maxRate: '3000k', bufSize: '6000k', audioBitrate: '128k' },
   { name: '480p', width: 854, height: 480, videoBitrate: '1500k', maxRate: '1800k', bufSize: '3000k', audioBitrate: '96k' },
-  { name: '360p', width: 640, height: 360, videoBitrate: '800k', maxRate: '900k', bufSize: '1800k', audioBitrate: '96k' },
 ]
 
 export const DEFAULT_CODEC = 'h264'
