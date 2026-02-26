@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.7.6
+
+[compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.7.5...v0.7.6)
+
+### 💅 Refactors
+
+- Comment out unused 720p and 360p renditions for better performence ([df83cee](https://github.com/Modest-Human-Brands/mdrive/commit/df83cee))
+
+### ❤️ Contributors
+
+- Shirsendu Bairagi ([@shba007](https://github.com/shba007))
+
 ## v0.7.5
 
 [compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.7.4...v0.7.5)
