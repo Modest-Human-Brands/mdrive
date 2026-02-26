@@ -5,7 +5,7 @@ import { z } from 'zod'
 export const config = {
   name: 'StreamStop',
   description: 'Stop a running HLS stream and clean up FFmpeg processes',
-  flows: ['live-stream-flow'],
+  flows: ['stream-flow'],
   triggers: [
     http('POST', '/stream/stop', {
       bodySchema: z.object({ slug: z.string(), deviceId: z.string() }),
@@ -16,7 +16,7 @@ export const config = {
       },
     }),
   ],
-  enqueues: [{ topic: 'stream.stopped', label: 'Stream stopped and FFmpeg killed' }],
+  enqueues: ['stream.stopped'],
 } as const satisfies StepConfig
 
 export const handler: Handlers<typeof config> = async ({ body }, { enqueue, logger, state }) => {

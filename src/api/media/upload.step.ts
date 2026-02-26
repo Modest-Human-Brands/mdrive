@@ -5,7 +5,6 @@ import { Readable } from 'node:stream'
 import Busboy from 'busboy'
 import diskPutFileStream from 'src/utils/disk-put-file-stream'
 import r2PutFileStream from 'src/utils/r2-put-file-stream'
-import generateSemanticSlug from 'src/utils/slugify'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 * 1024
 
@@ -37,28 +36,25 @@ function inferContentType(filename: string): string {
 export const config = {
   name: 'MediaUpload',
   description: 'Ingest multipart media files, validate, generate slug, persist to disk and R2',
-  flows: ['upload-media'],
+  flows: ['media-upload-flow'],
   triggers: [
     http('POST', '/media', {
       bodySchema: z.any(),
-      querySchema: z.object({ projectSlug: z.string() }),
+      querySchema: z.object({ slug: z.string() }),
     }),
   ],
-  enqueues: [
-    { topic: 'media.file.saved', label: 'File saved to disk and R2' },
-    { topic: 'media.upload.failed', label: 'File failed validation or write' },
-  ],
+  enqueues: ['media.file.saved', 'media.upload.failed'],
 } as const satisfies StepConfig
 
 export const handler: Handlers<typeof config> = async (req, { enqueue, logger, traceId }) => {
-  const { projectSlug } = req.queryParams
+  const { projectSlug: slug } = req.queryParams
   const nodeReq = req
 
   const r2Endpoint = process.env.MOTIA_R2_ENDPOINT!
   const r2Bucket = process.env.MOTIA_R2_BUCKET!
 
   // Resolve project index from slug tail e.g. "brand-assets-49" => "0049"
-  const projectIndexNum = parseInt((projectSlug.match(/(\d+)\s*$/) ?? [])[1] ?? 'NaN', 10)
+  const projectIndexNum = parseInt((slug.match(/(\d+)\s*$/) ?? [])[1] ?? 'NaN', 10)
   if (isNaN(projectIndexNum)) {
     return { status: 400, body: { error: 'Invalid project slug format' } }
   }
@@ -94,8 +90,8 @@ export const handler: Handlers<typeof config> = async (req, { enqueue, logger, t
 
       const kind = inferKind(mimeType)
       const assetIndex = String(nextAssetIndex++).padStart(4, '0')
-      const slug = generateSemanticSlug(kind, projectIndex, assetIndex)
-      const filename = `${slug}${ext}`
+      const assetSlug = generateSemanticSlug(kind, projectIndex, assetIndex)
+      const filename = `${assetSlug}${ext}`
       const relPath = path.join('source', filename)
       const absPath = path.join('static', relPath)
 
@@ -104,23 +100,23 @@ export const handler: Handlers<typeof config> = async (req, { enqueue, logger, t
 
       const write = diskPutFileStream(absPath, diskStream)
         .then(async () => {
-          logger.info(`[${traceId}] Disk saved`, { slug })
+          logger.info(`[${traceId}] Disk saved`, { slug: assetSlug })
 
           // R2 needs size — get it from disk meta after write
           const { size } = await import('node:fs/promises').then((fs) => fs.stat(absPath))
 
           await r2PutFileStream(relPath, r2Stream, size, { endpoint: r2Endpoint, bucket: r2Bucket })
-          logger.info(`[${traceId}] R2 saved`, { slug, size })
+          logger.info(`[${traceId}] R2 saved`, { slug: assetSlug, size })
 
           await enqueue({
             topic: 'media.file.saved',
-            data: { slug, relPath: absPath, mimeType, size, projectSlug, traceId },
+            data: { slug: assetSlug, relPath: absPath, mimeType, size, projectSlug: assetSlug, traceId },
           })
         })
         .catch(async (error) => {
-          logger.error(`[${traceId}] Write failed`, { slug, error })
+          logger.error(`[${traceId}] Write failed`, { slug: assetSlug, error })
           failed.push({ filename: originalName, error: String(error) })
-          await enqueue({ topic: 'media.upload.failed', data: { slug, error: String(error) } })
+          await enqueue({ topic: 'media.upload.failed', data: { slug: assetSlug, error: String(error) } })
         })
 
       fileWrites.push(write)

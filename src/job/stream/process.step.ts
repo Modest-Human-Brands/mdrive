@@ -20,14 +20,14 @@ const codecSchema = z.enum(['h264', 'h265', 'av1', 'vp9'])
 export type Rendition = z.infer<typeof renditionSchema>
 export type Codec = z.infer<typeof codecSchema>
 
-const DEFAULT_RENDITIONS: Rendition[] = [
+export const DEFAULT_RENDITIONS: Rendition[] = [
   { name: '1080p', width: 1920, height: 1080, videoBitrate: '5000k', maxRate: '5500k', bufSize: '10000k', audioBitrate: '128k' },
   { name: '720p', width: 1280, height: 720, videoBitrate: '2800k', maxRate: '3000k', bufSize: '6000k', audioBitrate: '128k' },
   { name: '480p', width: 854, height: 480, videoBitrate: '1500k', maxRate: '1800k', bufSize: '3000k', audioBitrate: '96k' },
   { name: '360p', width: 640, height: 360, videoBitrate: '800k', maxRate: '900k', bufSize: '1800k', audioBitrate: '96k' },
 ]
 
-const DEFAULT_CODECS: Codec[] = ['h264']
+export const DEFAULT_CODEC = 'h264'
 
 const CODEC_CONFIG: Record<Codec, { encoder: string; ext: string; bandwidth: number; preset: string | null; tune: string | null }> = {
   h264: { encoder: 'libx264', ext: 'h264', bandwidth: 1, preset: 'veryfast', tune: 'zerolatency' },
@@ -60,7 +60,7 @@ const CODEC_HLS_FORMAT: Record<Codec, { segExt: string; hlsSegType: string }> = 
 export const config = {
   name: 'StreamProcess',
   description: 'Process using FFmpeg for multi-device, multi-resolution, multi-codec HLS streaming',
-  flows: ['live-stream-flow'],
+  flows: ['stream-flow'],
   triggers: [
     queue('stream.process', {
       input: z.object({
@@ -71,52 +71,48 @@ export const config = {
       }),
     }),
   ],
-  enqueues: [
-    { topic: 'stream.ready', label: 'Stream is live' },
-    { topic: 'stream.error', label: 'Stream failed' },
-  ],
+  enqueues: ['stream.processed', 'stream.error'],
 } as const satisfies StepConfig
 
-function buildFFmpegArgsForCodec(slug: string, deviceId: string, deviceDir: string, renditions: Rendition[], codec: Codec, includeOriginal: boolean): string[] {
-  const args: string[] = ['-i', `srt://${import.meta.env.MOTIA_SRT_HOST}:${import.meta.env.MOTIA_SRT_PORT}?streamid=live/${slug}/${deviceId}&mode=listener&pkt_size=1316`]
+function buildFFmpegArgs(slug: string, deviceId: string, deviceDir: string, renditions: Rendition[], codec: Codec): string[] {
+  const { encoder, preset, tune, segExt, hlsSegType } = { ...CODEC_CONFIG[codec], ...CODEC_HLS_FORMAT[codec] }
+  const isRatelessCodec = codec === 'av1' || codec === 'vp9'
 
-  if (includeOriginal) {
-    args.push(
-      '-map',
-      '0:v',
-      '-map',
-      '0:a?',
-      '-c:v',
-      'libx264',
-      '-preset',
-      'veryfast',
-      '-c:a',
-      'aac',
-      '-f',
-      'mp4',
-      '-movflags',
-      '+frag_keyframe+empty_moov+default_base_moof',
-      join(deviceDir, 'original', `recording-${Date.now()}.mp4`)
-    )
-  }
+  const filterComplex = [
+    `[0:v]split=${renditions.length}${renditions.map((_, i) => `[vin${i}]`).join('')}`,
+    ...renditions.map((r, i) => `[vin${i}]scale=${r.width}:${r.height}:force_original_aspect_ratio=decrease,pad=${r.width}:${r.height}:(ow-iw)/2:(oh-ih)/2[vout${i}]`),
+  ].join('; ')
 
-  const { encoder, preset, tune, segExt, hlsSegType } = {
-    ...CODEC_CONFIG[codec],
-    ...CODEC_HLS_FORMAT[codec],
-  }
+  const args: string[] = [
+    '-i',
+    `srt://${import.meta.env.MOTIA_SRT_HOST}:${import.meta.env.MOTIA_SRT_PORT}?streamid=live/${slug}/${deviceId}&mode=listener&pkt_size=1316`,
+    '-filter_complex',
+    filterComplex,
+    // Original: passthrough copy, isolated so transcode failures don't affect it
+    '-map',
+    '0:v',
+    '-map',
+    '0:a?',
+    '-c:v',
+    'copy',
+    '-c:a',
+    'copy',
+    '-bsf:a',
+    'aac_adtstoasc',
+    '-f',
+    'mp4',
+    '-movflags',
+    '+frag_keyframe+empty_moov+default_base_moof',
+    join(deviceDir, 'original', `recording-${Date.now()}.mp4`),
+  ]
 
-  for (const r of renditions) {
+  for (const [i, r] of renditions.entries()) {
     const variantDir = join(deviceDir, 'hls', `${r.name}-${codec}`)
-    const vf = `scale=${r.width}:${r.height}:force_original_aspect_ratio=decrease,pad=${r.width}:${r.height}:(ow-iw)/2:(oh-ih)/2`
-    const isRatelessCodec = codec === 'av1' || codec === 'vp9'
-
     args.push(
       '-map',
-      '0:v',
+      `[vout${i}]`,
       '-map',
       '0:a?',
-      '-vf',
-      vf,
       '-c:v',
       encoder,
       ...(preset ? ['-preset', preset] : []),
@@ -166,47 +162,35 @@ async function writeMasterPlaylist(deviceDir: string, renditions: Rendition[], c
 
 export const handler: Handlers<typeof config> = async ({ slug, deviceId }, { enqueue, logger, state }) => {
   const renditions = DEFAULT_RENDITIONS
-  const codecs = DEFAULT_CODECS
   const deviceDir = join(process.cwd(), 'static', 'stream', slug, deviceId)
+  const procKey = `${slug}:${deviceId}`
 
-  await mkdir(join(deviceDir, 'original'), { recursive: true })
-  for (const codec of codecs) {
-    for (const r of renditions) {
-      await mkdir(join(deviceDir, 'hls', `${r.name}-${codec}`), { recursive: true })
-    }
-  }
-  await writeMasterPlaylist(deviceDir, renditions, codecs)
-
-  for (const [index, codec] of codecs.entries()) {
-    const procKey = `${slug}:${deviceId}:${codec}`
-
-    if (hasProcess(procKey)) {
-      logger.warn(`Stream ${procKey} already running, skipping`)
-      continue
-    }
-
-    const args = buildFFmpegArgsForCodec(
-      slug,
-      deviceId,
-      deviceDir,
-      renditions,
-      codec,
-      index === 0 // only first codec captures original recording
-    )
-
-    logger.info(`Spawning FFmpeg [${codec}] for ${slug}:${deviceId} — ${renditions.length} renditions`)
-
-    const proc = execa('ffmpeg', args, { reject: false })
-    proc.stderr?.on('data', (d) => logger.info(`[ffmpeg:${procKey}] ${d.toString().trim()}`))
-    proc.on('exit', async (code) => {
-      deregisterProcess(procKey, state)
-      logger.info(`[${procKey}] exited with code ${code}`)
-      await enqueue({ topic: 'stream.error', data: { slug: slug, deviceId, codec, code } })
-    })
-    registerProcess(procKey, proc, { slug: slug, deviceId, codec }, state)
+  if (hasProcess(procKey)) {
+    logger.warn(`Stream ${procKey} already running, skipping`)
+    return { status: 409, body: { success: false, reason: 'already running' } }
   }
 
-  await enqueue({ topic: 'stream.ready', data: { slug: slug, deviceId } })
+  // TODO: add a presistent global state instead of folder state
+  // await mkdir(join(deviceDir, 'original'), { recursive: true })
+  // for (const r of renditions) {
+  //   await mkdir(join(deviceDir, 'hls', `${r.name}-${codec}`), { recursive: true })
+  // }
+  await writeMasterPlaylist(deviceDir, renditions, [DEFAULT_CODEC])
 
-  return { status: 200, body: '' }
+  const args = buildFFmpegArgs(slug, deviceId, deviceDir, renditions, DEFAULT_CODEC)
+
+  logger.info(`Spawning FFmpeg [${DEFAULT_CODEC}] for ${slug}:${deviceId} — ${renditions.length} renditions, single SRT read`)
+
+  const proc = execa('ffmpeg', args, { reject: false })
+  proc.stderr?.on('data', (d) => logger.info(`[ffmpeg:${procKey}] ${d.toString().trim()}`))
+  proc.on('exit', async (code) => {
+    deregisterProcess(procKey, state)
+    logger.info(`[${procKey}] exited with code ${code}`)
+    await enqueue({ topic: 'stream.error', data: { slug, deviceId, codec: DEFAULT_CODEC, code } })
+  })
+  registerProcess(procKey, proc, { slug, deviceId, codec: DEFAULT_CODEC }, state)
+
+  await enqueue({ topic: 'stream.processed', data: { slug, deviceId } })
+
+  return { status: 200, body: { success: true } }
 }

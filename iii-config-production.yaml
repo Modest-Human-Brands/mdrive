@@ -71,4 +71,4 @@ modules:
   - class: modules::shell::ExecModule
     config:
       exec:
-        - bun run dist/index-production.js
+        - bun run --enable-source-maps dist/index-production.js

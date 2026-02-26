@@ -1,4 +1,4 @@
-name: Nuxt Release
+name: Motia Release
 
 permissions:
   contents: write

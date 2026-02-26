@@ -1,4 +1,4 @@
-name: Nuxt CI
+name: Motia CI
 
 permissions:
   contents: write

@@ -4,7 +4,7 @@ import { z } from 'zod'
 export const config = {
   name: 'MediaNotionSync',
   description: 'Create a Notion asset page from processed media metadata',
-  flows: ['upload-media'],
+  flows: ['media-upload-flow'],
   triggers: [
     queue('media.file.processed', {
       input: z.object({
@@ -61,4 +61,6 @@ export const handler: Handlers<typeof config> = async ({ slug, mimeType, project
   })
 
   logger.info(`[${traceId}] Notion page created`, { slug, coverURL })
+
+  return { status: 200, body: { success: true } }
 }

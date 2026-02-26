@@ -16,9 +16,9 @@ const mediaSchema = z.object({
 })
 
 export const config = {
-  name: 'MediaGetOne',
+  name: 'MediaGet',
   description: 'Get a single media item by slug',
-  flows: ['get-media'],
+  flows: ['media-get-flow'],
   triggers: [
     http('GET', '/media/:slug', {
       responseSchema: {

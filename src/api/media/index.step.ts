@@ -3,9 +3,9 @@ import { z } from 'zod'
 import syncDrive from 'src/utils/sync-drive'
 
 export const config = {
-  name: 'MediaGetAll',
+  name: 'MediaAllGet',
   description: 'Get all Media',
-  flows: ['get-media'],
+  flows: ['media-get-flow'],
   triggers: [
     http('GET', '/media', {
       responseSchema: { 200: z.array(z.object({ slug: z.string(), type: z.string() })) },

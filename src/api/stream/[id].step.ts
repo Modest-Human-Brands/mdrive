@@ -1,20 +1,32 @@
 import { http, type Handlers, type StepConfig } from 'motia'
 import { z } from 'zod'
-import { access } from 'node:fs/promises'
-import { join } from 'node:path'
 
-const streamSchema = z.object({
+import resolveStreamStatus from 'src/utils/resolve-stream-status'
+
+export enum StreamStatus {
+  Idle = 'idle', // registered, nothing started
+  Starting = 'starting', // FFmpeg spawning, waiting for SRT connection
+  Live = 'live', // SRT connected, actively encoding
+  Paused = 'paused', // stream paused, FFmpeg still running
+  Stopping = 'stopping', // SIGTERM sent, flushing buffers
+  Stopped = 'stopped', // FFmpeg exited cleanly (code 0)
+  Error = 'error', // FFmpeg exited with non-zero code
+  Processing = 'processing', // post-stream: remux / R2 upload in progress
+  Ready = 'ready', // processing done, VOD available
+}
+
+export const streamSchema = z.object({
   slug: z.string(),
   deviceId: z.string(),
-  srtUrl: z.string(),
-  hlsUrl: z.string(),
-  isLive: z.boolean(),
+  status: z.enum(StreamStatus),
+  streamUrl: z.string(),
+  media: z.string(),
 })
 
 export const config = {
   name: 'StreamStatus',
   description: 'Get a single active HLS stream by slug (slug-deviceId)',
-  flows: ['live-stream-flow'],
+  flows: ['stream-flow'],
   triggers: [
     http('GET', '/stream/:slug/:deviceId', {
       responseSchema: {
@@ -33,25 +45,18 @@ export const handler: Handlers<typeof config> = async ({ pathParams }, { logger 
     return { status: 404, body: { error: 'Invalid slug format, expected slug-deviceId' } }
   }
 
-  const hlsPath = join(process.cwd(), 'static', 'stream', slug, deviceId, 'hls', 'master.m3u8')
+  const status = await resolveStreamStatus(slug, deviceId)
 
-  try {
-    await access(hlsPath)
-  } catch {
-    logger.warn(`Stream not found: ${slug}`)
-    return { status: 404, body: { error: `Stream ${slug} not found` } }
-  }
-
-  logger.info(`Stream found: ${slug}`)
+  logger.info(`Stream found: ${slug}:${status}`)
 
   return {
     status: 200,
     body: {
       slug,
       deviceId,
-      srtUrl: `srt://${import.meta.env.MOTIA_SRT_HOST}:${import.meta.env.MOTIA_SRT_PORT}?streamid=live/${slug}/${deviceId}`,
-      hlsUrl: `stream/${slug}/${deviceId}/hls/master.m3u8`,
-      isLive: true,
+      status,
+      streamUrl: `srt://${import.meta.env.MOTIA_SRT_HOST}:${import.meta.env.MOTIA_SRT_PORT}?streamid=live/${slug}/${deviceId}`,
+      media: `stream/${slug}/${deviceId}/hls/master.m3u8`,
     },
   }
 }

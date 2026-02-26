@@ -9,7 +9,7 @@ import calculateDimension from 'src/utils/calculate-dimension'
 export const config = {
   name: 'MediaProcess',
   description: 'Extract metadata, resolution and aspect ratio for a saved media file',
-  flows: ['upload-media'],
+  flows: ['media-upload-flow'],
   triggers: [
     queue('media.file.saved', {
       input: z.object({
@@ -22,7 +22,7 @@ export const config = {
       }),
     }),
   ],
-  enqueues: [{ topic: 'media.file.processed', label: 'Metadata extracted and ready for sync' }],
+  enqueues: ['media.file.processed'],
 } as const satisfies StepConfig
 
 export const handler: Handlers<typeof config> = async ({ slug, relPath, mimeType, size, projectSlug, traceId }, { enqueue, logger }) => {
@@ -64,4 +64,6 @@ export const handler: Handlers<typeof config> = async ({ slug, relPath, mimeType
       duration,
     },
   })
+
+  return { status: 200, body: { success: true } }
 }
