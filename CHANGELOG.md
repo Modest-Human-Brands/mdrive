@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.7.7
+
+[compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.7.6...v0.7.7)
+
+### 🔥 Performance
+
+- Updated codec config for better performance ([2b5b5cb](https://github.com/Modest-Human-Brands/mdrive/commit/2b5b5cb))
+
+### ❤️ Contributors
+
+- Shirsendu Bairagi ([@shba007](https://github.com/shba007))
+
 ## v0.7.6
 
 [compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.7.5...v0.7.6)
