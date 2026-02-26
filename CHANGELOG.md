@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.7.5
+
+[compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.7.4...v0.7.5)
+
+### 💅 Refactors
+
+- Updated streaming flow ([201994a](https://github.com/Modest-Human-Brands/mdrive/commit/201994a))
+
+### ❤️ Contributors
+
+- Shirsendu Bairagi ([@shba007](https://github.com/shba007))
+
 ## v0.7.4
 
 [compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.7.3...v0.7.4)
