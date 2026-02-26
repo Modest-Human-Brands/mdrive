@@ -1,7 +1,7 @@
 import { queue, type Handlers, type StepConfig } from 'motia'
 import { z } from 'zod'
 import { execa } from 'execa'
-import { mkdir, writeFile } from 'node:fs/promises'
+import { writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { deregisterProcess, hasProcess, registerProcess } from 'src/utils/stream-processes'
 
@@ -21,15 +21,15 @@ export type Rendition = z.infer<typeof renditionSchema>
 export type Codec = z.infer<typeof codecSchema>
 
 export const DEFAULT_RENDITIONS: Rendition[] = [
-  { name: '1080p', width: 1920, height: 1080, videoBitrate: '5000k', maxRate: '5500k', bufSize: '10000k', audioBitrate: '128k' },
-  // { name: '720p', width: 1280, height: 720, videoBitrate: '2800k', maxRate: '3000k', bufSize: '6000k', audioBitrate: '128k' },
+  // { name: '1080p', width: 1920, height: 1080, videoBitrate: '5000k', maxRate: '5500k', bufSize: '10000k', audioBitrate: '128k' },
+  { name: '720p', width: 1280, height: 720, videoBitrate: '2800k', maxRate: '3000k', bufSize: '6000k', audioBitrate: '128k' },
   { name: '480p', width: 854, height: 480, videoBitrate: '1500k', maxRate: '1800k', bufSize: '3000k', audioBitrate: '96k' },
 ]
 
 export const DEFAULT_CODEC = 'h264'
 
 const CODEC_CONFIG: Record<Codec, { encoder: string; ext: string; bandwidth: number; preset: string | null; tune: string | null }> = {
-  h264: { encoder: 'libx264', ext: 'h264', bandwidth: 1, preset: 'veryfast', tune: 'zerolatency' },
+  h264: { encoder: 'libx264', ext: 'h264', bandwidth: 1, preset: 'superfast', tune: 'zerolatency' },
   h265: { encoder: 'libx265', ext: 'h265', bandwidth: 0.6, preset: 'veryfast', tune: 'zerolatency' },
   av1: { encoder: 'libsvtav1', ext: 'av1', bandwidth: 0.5, preset: '10', tune: null },
   vp9: { encoder: 'libvpx-vp9', ext: 'vp9', bandwidth: 0.7, preset: null, tune: null },
@@ -43,7 +43,7 @@ const CODEC_STRINGS: Record<Codec, string> = {
 }
 
 const CODEC_EXTRA_ARGS: Record<Codec, string[]> = {
-  h264: [],
+  h264: ['-profile:v', 'main', '-level', '3.1', '-g', '60', '-sc_threshold', '0', '-force_key_frames', 'expr:gte(t,n_forced*2)'],
   h265: [],
   av1: [],
   vp9: ['-deadline', 'realtime', '-cpu-used', '8', '-row-mt', '1'],

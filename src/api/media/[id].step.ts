@@ -1,6 +1,6 @@
 import { http, type Handlers, type StepConfig } from 'motia'
 import { z } from 'zod'
-import syncDrive from '../../utils/sync-drive'
+import syncDrive from 'src/utils/sync-drive'
 
 const mediaSchema = z.object({
   slug: z.string(),

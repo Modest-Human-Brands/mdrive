@@ -1,4 +1,4 @@
-import { http, queue, type Handlers, type StepConfig } from 'motia'
+import { queue, type Handlers, type StepConfig } from 'motia'
 import { z } from 'zod'
 
 export const config = {
