@@ -20,8 +20,16 @@ export const config = {
 export const handler: Handlers<typeof config> = async (_, { logger }) => {
   logger.info('Show Health Status')
 
+  // com.docker.compose.service || com.docker.swarm.task.name
+  const node = import.meta.env.HOSTNAME || 'unknown-node'
+
   return {
     status: 200,
-    body: { status: 'OK' },
+    body: {
+      status: 'OK',
+      version: import.meta.env.MOTIA_APP_VERSION,
+      buildTime: import.meta.env.MOTIA_APP_BUILD_TIME,
+      node,
+    },
   }
 }

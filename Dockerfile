@@ -18,6 +18,9 @@ RUN curl -fsSL https://install.iii.dev/iii/main/install.sh | bash
 
 FROM oven/bun:1-alpine AS runner
 
+ARG VERSION
+ARG BUILD_TIME
+
 RUN apk add --no-cache \
   --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main \
   --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community \
@@ -33,6 +36,10 @@ COPY --from=builder /app/package.json .
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY iii-config-production.yaml .
+
+ENV NODE_ENV=production
+ENV MOTIA_APP_VERSION=$VERSION
+ENV MOTIA_APP_BUILD_TIME=$BUILD_TIME
 
 EXPOSE 3111
 EXPOSE 3112

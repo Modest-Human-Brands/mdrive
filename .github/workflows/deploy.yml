@@ -22,7 +22,7 @@ env:
   VERSION: ${{ github.ref_name }}
 
 jobs:
-  build-web:
+  build:
     runs-on: ubuntu-latest
 
     outputs:

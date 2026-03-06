@@ -31,8 +31,7 @@ export const handler: Handlers<typeof config> = async (_req, { logger }) => {
         const deviceIds = await readdir(join(hlsRoot, slug))
         return Promise.all(
           deviceIds.map(async (deviceId) => ({
-            slug,
-            deviceId,
+            slug: `${slug}-${deviceId}`,
             status: await resolveStreamStatus(slug, deviceId),
             streamUrl: `srt://${import.meta.env.MOTIA_SRT_HOST}:${import.meta.env.MOTIA_SRT_PORT}?streamid=live/${slug}/${deviceId}`,
             media: `stream/${slug}/${deviceId}/hls/master.m3u8`,
