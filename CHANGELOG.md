@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.7.8
+
+[compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.7.7...v0.7.8)
+
+### 🚀 Enhancements
+
+- Enhance deployment and health check with versioning and build time ([a4cdc68](https://github.com/Modest-Human-Brands/mdrive/commit/a4cdc68))
+
+### ❤️ Contributors
+
+- Shirsendu Bairagi ([@shba007](https://github.com/shba007))
+
 ## v0.7.7
 
 [compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.7.6...v0.7.7)
