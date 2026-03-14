@@ -1,6 +1,6 @@
 {
   "name": "mdrive",
-  "version": "0.7.8",
+  "version": "0.7.9",
   "description": "A role-based media asset management service for storing, organizing, and distributing unlimited media via global CDN, with granular access control and signed URL delivery",
   "author": "Shirsendu Bairagi <shirsendu2001@gmail.com>",
   "license": "MIT",

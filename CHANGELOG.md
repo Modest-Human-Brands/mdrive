@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.7.9
+
+[compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.7.8...v0.7.9)
+
+### 🏡 Chore
+
+- Housekeeping ([481bc37](https://github.com/Modest-Human-Brands/mdrive/commit/481bc37))
+
+### ❤️ Contributors
+
+- Shirsendu Bairagi ([@shba007](https://github.com/shba007))
+
 ## v0.7.8
 
 [compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.7.7...v0.7.8)
