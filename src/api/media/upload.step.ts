@@ -54,8 +54,8 @@ export const handler: Handlers<typeof config> = async (req, { enqueue, logger, t
   const r2Bucket = process.env.MOTIA_R2_BUCKET!
 
   // Resolve project index from slug tail e.g. "brand-assets-49" => "0049"
-  const projectIndexNum = parseInt((slug.match(/(\d+)\s*$/) ?? [])[1] ?? 'NaN', 10)
-  if (isNaN(projectIndexNum)) {
+  const projectIndexNum = Number.parseInt((slug.match(/(\d+)\s*$/) ?? [])[1] ?? 'NaN', 10)
+  if (Number.isNaN(projectIndexNum)) {
     return { status: 400, body: { error: 'Invalid project slug format' } }
   }
   const projectIndex = String(projectIndexNum).padStart(4, '0')
@@ -127,8 +127,8 @@ export const handler: Handlers<typeof config> = async (req, { enqueue, logger, t
       try {
         await Promise.all(fileWrites)
         resolve()
-      } catch (e) {
-        reject(e)
+      } catch (error_) {
+        reject(error_)
       }
     })
   })

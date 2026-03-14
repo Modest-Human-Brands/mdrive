@@ -119,7 +119,7 @@ function buildFFmpegArgs(slug: string, deviceId: string, deviceDir: string, rend
       ...CODEC_EXTRA_ARGS[codec],
       '-b:v',
       r.videoBitrate,
-      ...(!isRatelessCodec ? ['-maxrate', r.maxRate, '-bufsize', r.bufSize] : []),
+      ...(isRatelessCodec ? [] : ['-maxrate', r.maxRate, '-bufsize', r.bufSize]),
       '-c:a',
       'aac',
       '-b:a',
@@ -151,7 +151,7 @@ async function writeMasterPlaylist(deviceDir: string, renditions: Rendition[], c
     const codecStr = CODEC_STRINGS[codec]
 
     for (const r of renditions) {
-      const bw = Math.round(parseInt(r.videoBitrate) * 1000 * bandwidth)
+      const bw = Math.round(Number.parseInt(r.videoBitrate) * 1000 * bandwidth)
       lines.push(`#EXT-X-STREAM-INF:BANDWIDTH=${bw},RESOLUTION=${r.width}x${r.height},CODECS="${codecStr}"`, `${r.name}-${codec}/index.m3u8`)
     }
   }

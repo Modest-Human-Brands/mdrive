@@ -14,7 +14,7 @@ export const config = {
 } as const satisfies StepConfig
 
 export const handler: Handlers<typeof config> = async ({ file, path }, { logger }) => {
-  if (!path || !file) throw Error('Missing path or file')
+  if (!path || !file) throw new Error('Missing path or file')
 
   logger.info(`Uploading ${path}, ${file}`)
 

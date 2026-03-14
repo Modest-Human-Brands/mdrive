@@ -52,7 +52,7 @@ export const handler: Handlers<typeof config> = async ({ pathParams }, { logger 
   return {
     status: 200,
     body: {
-      slug: `${slug}-${deviceId}`,
+      slug: `${slug}:${deviceId}`,
       status,
       streamUrl: `srt://${import.meta.env.MOTIA_SRT_HOST}:${import.meta.env.MOTIA_SRT_PORT}?streamid=live/${slug}/${deviceId}`,
       media: `stream/${slug}/${deviceId}/hls/master.m3u8`,

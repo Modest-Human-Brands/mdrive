@@ -2,7 +2,7 @@
   <img src="./public/logo.png" alt="Logo" width="65" />
 </p>
 
-# MMDrive
+# MDrive
 
 <p align="center">
   <a href="https://shirsendu-bairagi.betteruptime.com">
@@ -16,9 +16,9 @@
 
 ---
 
-## What is MMDrive?
+## What is MDrive?
 
-MMDrive is a self-hostable media infrastructure layer. It handles the full lifecycle of media assets — from upload or live stream ingest, through transcoding and optimization, to CDN-backed delivery. Built on [Motia](https://motia.dev), it uses an event-driven step architecture making each pipeline stage independently scalable and observable.
+MDrive is a self-hostable media infrastructure layer. It handles the full lifecycle of media assets — from upload or live stream ingest, through transcoding and optimization, to CDN-backed delivery. Built on [Motia](https://motia.dev), it uses an event-driven step architecture making each pipeline stage independently scalable and observable.
 
 ---
 
@@ -139,26 +139,26 @@ docker node ls
 
 ```bash
 # Mount static and .data into your deployment path
-upload static, .data into /root/mmdrive
+upload static, .data into /root/MDrive
 ```
 
 ### 5. Deploy Stack
 
 ```bash
-docker stack deploy --compose-file docker-compose.prod.yml mmdrive
+docker stack deploy --compose-file docker-compose.prod.yml MDrive
 ```
 
 ### 6. Scale Workers
 
 ```bash
-docker service scale mmdrive_app=2
+docker service scale MDrive_app=2
 ```
 
 ### 7. Verify
 
 ```bash
 docker service ls
-docker service ps mmdrive_app
+docker service ps MDrive_app
 ```
 
 ---

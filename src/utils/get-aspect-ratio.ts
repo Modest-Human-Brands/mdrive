@@ -5,11 +5,13 @@ export type AspectRatio = (typeof aspectRatio)[number]
  * Determine the nearest aspect-ratio bucket based on width/height.
  */
 export default function (width: number, height: number): AspectRatio {
-  return aspectRatio.reduce((best, ar) => {
+  let best: AspectRatio = aspectRatio[0]
+  for (const ar of aspectRatio) {
     const [bw, bh] = best.split(':').map(Number)
     const [cw, ch] = ar.split(':').map(Number)
     const diffBest = Math.abs(width / height - bw / bh)
     const diffCurr = Math.abs(width / height - cw / ch)
-    return diffCurr < diffBest ? ar : best
-  }) as AspectRatio
+    if (diffCurr < diffBest) best = ar
+  }
+  return best
 }

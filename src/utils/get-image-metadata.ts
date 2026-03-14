@@ -19,7 +19,7 @@ export default async function (filePath: string): Promise<ImageMetadata> {
   const meta = imageMeta(data)
 
   if (typeof meta.width !== 'number' || typeof meta.height !== 'number') {
-    throw new Error(`Could not determine image dimensions for: ${filePath}`)
+    throw new TypeError(`Could not determine image dimensions for: ${filePath}`)
   }
 
   return {

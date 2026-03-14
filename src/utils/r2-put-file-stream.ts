@@ -1,11 +1,16 @@
 import mimeTypes from 'mime-types'
 
-export default async function (
-  objectKey: string,
-  webStream: ReadableStream,
-  byteLength: number,
-  { endpoint, bucket } = { endpoint: import.meta.env.NUXT_PRIVATE_R2_ENDPOINT!, bucket: import.meta.env.NUXT_PRIVATE_R2_BUCKET! }
-) {
+interface R2PutOptions {
+  endpoint: string
+  bucket: string
+}
+
+const defaultOptions: R2PutOptions = {
+  endpoint: import.meta.env.NUXT_PRIVATE_R2_ENDPOINT!,
+  bucket: import.meta.env.NUXT_PRIVATE_R2_BUCKET!,
+}
+
+export default async function (objectKey: string, webStream: ReadableStream, byteLength: number, { endpoint, bucket }: R2PutOptions = defaultOptions) {
   const url = `${endpoint}/${bucket}/${objectKey}`
 
   let res: Response
@@ -19,8 +24,8 @@ export default async function (
       },
       body: await new Response(webStream).blob(),
     })
-  } catch (err) {
-    throw new Error('Failed to upload (network error)', { cause: err as unknown }) // ES2022 cause
+  } catch (error_) {
+    throw new Error('Failed to upload (network error)', { cause: error_ as unknown }) // ES2022 cause
   }
 
   if (!res.ok) {

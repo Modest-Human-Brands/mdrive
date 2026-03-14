@@ -31,8 +31,8 @@ export const handler: Handlers<typeof config> = async ({ slug, relPath, mimeType
   const isImage = mimeType.startsWith('image/')
   const meta = isImage ? await getImageMetadata(relPath) : await getVideoMetadata(relPath)
 
-  const originalWidth = !('stream' in meta) ? meta.format.width! : meta.stream.width!
-  const originalHeight = !('stream' in meta) ? meta.format.height! : meta.stream.height!
+  const originalWidth = 'stream' in meta ? meta.stream.width! : meta.format.width!
+  const originalHeight = 'stream' in meta ? meta.stream.height! : meta.format.height!
 
   const resolutionLabel = getResolution(originalWidth, originalHeight)
   const aspectRatioLabel = getAspectRatio(originalWidth, originalHeight)
@@ -41,7 +41,7 @@ export const handler: Handlers<typeof config> = async ({ slug, relPath, mimeType
 
   const { width: coverWidth, height: coverHeight } = calculateDimension(1080, aspectRatio)
 
-  const duration = !isImage ? (meta as Awaited<ReturnType<typeof getVideoMetadata>>).format.duration : undefined
+  const duration = isImage ? undefined : (meta as Awaited<ReturnType<typeof getVideoMetadata>>).format.duration
 
   logger.info(`[${traceId}] Metadata extracted`, { slug, resolutionLabel, aspectRatioLabel })
 

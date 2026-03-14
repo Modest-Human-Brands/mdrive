@@ -46,8 +46,8 @@ export const handler: Handlers<typeof config> = async ({ slug, mimeType, project
     properties: {
       Name: { title: [{ type: 'text', text: { content: slug } }] },
       Project: { relation: [{ id: projectId }] },
-      Index: { number: parseInt(assetIndexStr, 10) },
-      'Version Index': { number: parseInt(versionIndexStr, 10) },
+      Index: { number: Number.parseInt(assetIndexStr, 10) },
+      'Version Index': { number: Number.parseInt(versionIndexStr, 10) },
       Type: { select: { name: kind } },
       Status: { status: { name: 'Plan' } },
       Resolution: { select: { name: resolutionLabel } },

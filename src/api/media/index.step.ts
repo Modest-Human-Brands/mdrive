@@ -30,7 +30,7 @@ export const handler: Handlers<typeof config> = async (_, { logger }) => {
           size: 22,
           bitDepth: '10 bit',
           resolution: '1080p',
-          fps: !key.startsWith('photo-') ? 30 : undefined,
+          fps: key.startsWith('photo-') ? undefined : 30,
         },
       }))
 

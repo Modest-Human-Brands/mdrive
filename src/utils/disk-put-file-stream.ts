@@ -11,13 +11,13 @@ export default async function (outPath: string, webStream: ReadableStream) {
 
   try {
     await webStream.pipeTo(webWritable)
-  } catch (err) {
+  } catch (error_) {
     file.destroy()
     try {
       await rm(outPath).catch(() => {})
     } catch {
       /* empty */
     }
-    throw new Error(`Failed to write file: ${outPath}`, { cause: err as unknown })
+    throw new Error(`Failed to write file: ${outPath}`, { cause: error_ as unknown })
   }
 }

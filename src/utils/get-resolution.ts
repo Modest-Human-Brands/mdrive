@@ -13,5 +13,5 @@ export default function (width: number, height: number): Resolution {
     }
   }
 
-  return resolutions[resolutions.length - 1]
+  return resolutions.at(-1)
 }
