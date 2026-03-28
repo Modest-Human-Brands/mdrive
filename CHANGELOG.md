@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.8.1
+
+[compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.8.0...v0.8.1)
+
+### 🩹 Fixes
+
+- Removed hardcoded variable ([21e4e11](https://github.com/Modest-Human-Brands/mdrive/commit/21e4e11))
+
+### ❤️ Contributors
+
+- Shirsendu Bairagi ([@shba007](https://github.com/shba007))
+
 ## v0.8.0
 
 [compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.7.8...v0.8.0)
