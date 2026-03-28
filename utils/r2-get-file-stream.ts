@@ -6,7 +6,7 @@ export default async function (objectKey: string, objectOrigin: 'cache' | 'origi
 
   const res = await (objectOrigin === 'cache' ? r2Cdn : r2Drive).fetch(url, { method: 'GET' })
   if (!(res.ok && res.body)) {
-    throw createError({ statusCode: res.status, message: res.statusText })
+    new Error(JSON.stringify({ statusCode: res.status, message: res.statusText }))
   }
 
   return {

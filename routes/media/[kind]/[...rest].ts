@@ -1,4 +1,4 @@
-import { createError, defineEventHandler, getValidatedRouterParams, H3Event, type EventHandlerRequest } from 'nitro/h3'
+import { defineEventHandler, getValidatedRouterParams, H3Event, type EventHandlerRequest } from 'nitro/h3'
 import { defineCachedFunction } from 'nitro/cache'
 import { useRuntimeConfig } from 'nitro/runtime-config'
 import { useStorage } from 'nitro/storage'
@@ -156,7 +156,7 @@ export default defineEventHandler(async (event) => {
     const [rawArgs, rawMediaId] = rest.split('/')
     const mediaId = rawMediaId!.replace(/\.[^.]+$/, '')
 
-    if (!mediaId) throw createError({ statusCode: 400, message: 'Missing media mediaId' })
+    if (!mediaId) new Error(JSON.stringify({ statusCode: 400, message: 'Missing media mediaId' }))
 
     const args = normalizeArgs(rawArgs!)
 
@@ -217,7 +217,7 @@ export default defineEventHandler(async (event) => {
 
       const mediaOriginId = (await syncDrive())[mediaId]
       if (!mediaOriginId) {
-        throw createError({ statusCode: 404, message: '🚧 Missing media' })
+        new Error(JSON.stringify({ statusCode: 404, message: '🚧 Missing media' }))
       }
 
       consola.warn('⚠️ Image Cache MISS', { cacheKey })
@@ -238,11 +238,11 @@ export default defineEventHandler(async (event) => {
       })
 
       if (!data?.streamPath) {
-        throw createError({ statusCode: 500, statusMessage: 'No stream generated' })
+        new Error(JSON.stringify({ statusCode: 500, statusMessage: 'No stream generated' }))
       }
 
       const stream = Readable.toWeb(createReadStream(data.streamPath))
-      const [storageStream, playbackStream] = stream.tee()
+      const [_storageStream, playbackStream] = stream.tee()
 
       // Cache to Storage (fire-and-forget; errors are logged)
       /*  r2PutFileStream(cacheKey, storageStream as ReadableStream, data.byteLength)
@@ -435,7 +435,7 @@ export default defineEventHandler(async (event) => {
         if (!mpd) {
           const mediaOriginId = (await syncDrive())[mediaId.split('_')[0]!]
           if (!mediaOriginId) {
-            throw createError({ statusCode: 404, message: '🚧 Missing media' })
+            new Error(JSON.stringify({ statusCode: 404, message: '🚧 Missing media' }))
           }
 
           consola.warn('⚠️ Video Cache MISS', { cacheKey })
@@ -448,6 +448,10 @@ export default defineEventHandler(async (event) => {
               payload: { cacheKey, mediaId: mediaId.split('_')[0], mediaOriginId, modifiers },
             },
           })
+
+          if (!data?.streamPath) {
+            new Error(JSON.stringify({ statusCode: 500, statusMessage: 'No stream generated' }))
+          }
         }
 
         return mpd
@@ -469,7 +473,7 @@ export default defineEventHandler(async (event) => {
             byteLength: metaData.size,
           }
 
-          if (event.method === 'HEAD') {
+          if (event.req.method === 'HEAD') {
             return
           }
 
@@ -494,7 +498,7 @@ export default defineEventHandler(async (event) => {
           return toClient
         }
 
-        throw createError({ statusCode: 400, message: 'Missing media mediaId' })
+        new Error(JSON.stringify({ statusCode: 400, message: 'Missing media mediaId' }))
 
         /*  const stream = Readable.toWeb(createReadStream(data.streamPath))
          const [storageStream, playbackStream] = stream.tee()
@@ -517,6 +521,6 @@ export default defineEventHandler(async (event) => {
     }
 
     consola.error('Route media GET', error)
-    throw createError({ statusCode: 500, message: 'Some Unknown Error Found' })
+    new Error(JSON.stringify({ statusCode: 500, message: 'Some Unknown Error Found' }))
   }
 })
