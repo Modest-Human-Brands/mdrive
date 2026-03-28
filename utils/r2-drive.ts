@@ -10,10 +10,10 @@ import { AwsClient } from 'aws4fetch'
 
 const r2DriveClientSingleton = () => {
   return new AwsClient({
-    accessKeyId: import.meta.env.MOTIA_DRIVE_R2_ACCESS_KEY_ID!,
-    secretAccessKey: import.meta.env.MOTIA_DRIVE_R2_SECRET_ACCESS_KEY!,
+    accessKeyId: process.env.NITRO_PRIVATE_DRIVE_R2_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.NITRO_PRIVATE_DRIVE_R2_SECRET_ACCESS_KEY!,
     service: 's3',
-    region: import.meta.env.MOTIA_DRIVE_R2_REGION || 'auto',
+    region: process.env.NITRO_PRIVATE_DRIVE_R2_REGION || 'auto',
   })
 }
 
@@ -25,4 +25,4 @@ const r2Drive = globalThis.r2DriveGlobal ?? r2DriveClientSingleton()
 
 export default r2Drive
 
-if (import.meta.env.NODE_ENV !== 'production') globalThis.r2DriveGlobal = r2Drive
+if (process.env.NODE_ENV !== 'production') globalThis.r2DriveGlobal = r2Drive

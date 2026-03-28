@@ -1,4 +1,4 @@
-name: Motia CI
+name: Nitro CI
 
 permissions:
   contents: write

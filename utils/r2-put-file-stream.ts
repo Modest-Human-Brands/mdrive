@@ -1,4 +1,5 @@
 import mimeTypes from 'mime-types'
+import r2Cdn from './r2-cdn'
 
 interface R2PutOptions {
   endpoint: string
@@ -6,8 +7,8 @@ interface R2PutOptions {
 }
 
 const defaultOptions: R2PutOptions = {
-  endpoint: import.meta.env.NUXT_PRIVATE_R2_ENDPOINT!,
-  bucket: import.meta.env.NUXT_PRIVATE_R2_BUCKET!,
+  endpoint: process.env.NUXT_PRIVATE_R2_ENDPOINT!,
+  bucket: process.env.NUXT_PRIVATE_R2_BUCKET!,
 }
 
 export default async function (objectKey: string, webStream: ReadableStream, byteLength: number, { endpoint, bucket }: R2PutOptions = defaultOptions) {
