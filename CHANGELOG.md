@@ -1,5 +1,41 @@
 # Changelog
 
+## v0.8.0
+
+[compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.7.8...v0.8.0)
+
+### 🚀 Enhancements
+
+- ⚠️ Migrated to nitro from motia ([171109b](https://github.com/Modest-Human-Brands/mdrive/commit/171109b))
+
+### 🩹 Fixes
+
+- Eslint issue ([f10891f](https://github.com/Modest-Human-Brands/mdrive/commit/f10891f))
+
+### 📖 Documentation
+
+- Updated readme ([93ad188](https://github.com/Modest-Human-Brands/mdrive/commit/93ad188))
+
+### 🏡 Chore
+
+- Housekeeping ([481bc37](https://github.com/Modest-Human-Brands/mdrive/commit/481bc37))
+- Removed unused vars ([aa63384](https://github.com/Modest-Human-Brands/mdrive/commit/aa63384))
+- Deps updated ([92aad69](https://github.com/Modest-Human-Brands/mdrive/commit/92aad69))
+
+### 🤖 CI
+
+- **release:** Update version ([ab5964f](https://github.com/Modest-Human-Brands/mdrive/commit/ab5964f))
+- **release:** Update version ([7627f99](https://github.com/Modest-Human-Brands/mdrive/commit/7627f99))
+
+#### ⚠️ Breaking Changes
+
+- ⚠️ Migrated to nitro from motia ([171109b](https://github.com/Modest-Human-Brands/mdrive/commit/171109b))
+
+### ❤️ Contributors
+
+- Shirsendu Bairagi ([@shba007](https://github.com/shba007))
+- Shba007 ([@shba007](https://github.com/shba007))
+
 ## v0.7.9
 
 [compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.7.8...v0.7.9)
