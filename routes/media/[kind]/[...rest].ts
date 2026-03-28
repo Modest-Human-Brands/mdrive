@@ -152,6 +152,7 @@ export const syncDrive = defineCachedFunction(
 
 export default defineEventHandler(async (event) => {
   try {
+    const config = useRuntimeConfig()
     const { kind, rest } = await getValidatedRouterParams(event, z.object({ kind: z.enum(['image', 'audio', 'video']), rest: z.string().min(1) }).parse)
     const [rawArgs, rawMediaId] = rest.split('/')
     const mediaId = rawMediaId!.replace(/\.[^.]+$/, '')
@@ -229,7 +230,7 @@ export default defineEventHandler(async (event) => {
       // }>('transform:image', { payload: { cacheKey, mediaOriginId, modifiers } })
 
       const data = await ofetch('/media', {
-        baseURL: 'http://localhost:3111',
+        baseURL: config.private.mediaUrl,
         method: 'POST',
         body: {
           taskType: 'transform:image',
@@ -441,7 +442,7 @@ export default defineEventHandler(async (event) => {
           consola.warn('⚠️ Video Cache MISS', { cacheKey })
 
           const data = await ofetch('/media', {
-            baseURL: 'http://localhost:3111',
+            baseURL: config.private.mediaUrl,
             method: 'POST',
             body: {
               taskType: 'transform:video',
