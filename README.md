@@ -12,15 +12,7 @@
 
 ![Landing](public/previews/landing.webp)
 
-> An open-source media backend platform for ingesting, transcoding, storing, and delivering video and image assets via a global CDN — with built-in live streaming support over SRT.
-
----
-
-## What is MDrive?
-
-MDrive is a self-hostable media infrastructure layer. It handles the full lifecycle of media assets — from upload or live stream ingest, through transcoding and optimization, to CDN-backed delivery. Built on [Motia](https://motia.dev), it uses an event-driven step architecture making each pipeline stage independently scalable and observable.
-
----
+> A role-based media asset management service for storing, organizing, and distributing unlimited media via global CDN, with granular access control and signed URL delivery
 
 ## Features
 
