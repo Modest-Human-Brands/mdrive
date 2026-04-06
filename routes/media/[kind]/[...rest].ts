@@ -191,7 +191,7 @@ export default defineEventHandler(async (event) => {
           byteLength: metaData.size,
         }
 
-        if (event.method === 'HEAD') {
+        if (event.req.method === 'HEAD') {
           return
         }
 
@@ -208,7 +208,7 @@ export default defineEventHandler(async (event) => {
           consola.info('💾 Image Saved to FS cache', { cacheKey, bytes: data.byteLength })
         })
 
-        if (event.method === 'HEAD') {
+        if (event.req.method === 'HEAD') {
           return
         }
 
@@ -229,7 +229,11 @@ export default defineEventHandler(async (event) => {
       //   byteLength: number
       // }>('transform:image', { payload: { cacheKey, mediaOriginId, modifiers } })
 
-      const data = await ofetch('/media', {
+      const data = await ofetch<{
+        streamPath: string
+        contentType: string
+        byteLength: number
+      }>('/media', {
         baseURL: config.private.mediaUrl,
         method: 'POST',
         body: {
@@ -243,7 +247,7 @@ export default defineEventHandler(async (event) => {
       }
 
       const stream = Readable.toWeb(createReadStream(data.streamPath))
-      const [_storageStream, playbackStream] = stream.tee()
+      const [_storageStream, responseStream] = stream.tee()
 
       // Cache to Storage (fire-and-forget; errors are logged)
       /*  r2PutFileStream(cacheKey, storageStream as ReadableStream, data.byteLength)
@@ -254,7 +258,7 @@ export default defineEventHandler(async (event) => {
            consola.error('Failed to save to cache', error)
          }) */
 
-      return playbackStream
+      return responseStream
     } // Pipeline of audio
     else if (kind === 'audio') {
       // const cacheKey = buildCacheKey({ kind, source: mediaId, args:JSON.stringify(modifiers), ext: 'mp3' })
@@ -394,7 +398,7 @@ export default defineEventHandler(async (event) => {
       }
 
       const stream = Readable.toWeb(createReadStream(data.streamPath))
-      const [storageStream, playbackStream] = stream.tee()
+      const [storageStream, responseStream] = stream.tee()
 
       // Cache to Storage (fire-and-forget; errors are logged)
       r2PutFileStream(cacheKey, storageStream as ReadableStream, data.byteLength)
@@ -405,7 +409,7 @@ export default defineEventHandler(async (event) => {
           consola.error('Failed to save to cache', error)
         })
 
-      return playbackStream
+      return responseStream
     } */
     else {
       const cacheKey = `cache/${kind}/${rawMediaId}` //buildCacheKey({ kind, source: mediaId, args: JSON.stringify(modifiers), ext: modifiers.format as string })
@@ -422,7 +426,7 @@ export default defineEventHandler(async (event) => {
               .join('-')
       modifiers.quality = !modifiers.quality || !modifiers.quality ? `80` : modifiers.quality
 
-      if (event.path.endsWith('.mpd')) {
+      if (event.url.pathname.endsWith('.mpd')) {
         console.log('Manifest File')
 
         event.res.headers.set('content-type', 'text/plain')
@@ -441,7 +445,11 @@ export default defineEventHandler(async (event) => {
 
           consola.warn('⚠️ Video Cache MISS', { cacheKey })
 
-          const data = await ofetch('/media', {
+          const data = await ofetch<{
+            streamPath: string
+            contentType: string
+            byteLength: number
+          }>('/media', {
             baseURL: config.private.mediaUrl,
             method: 'POST',
             body: {
@@ -491,7 +499,7 @@ export default defineEventHandler(async (event) => {
             consola.info('💾 Video Saved to FS cache', { cacheKey, bytes: data.byteLength })
           })
 
-          if (event.method === 'HEAD') {
+          if (event.req.method === 'HEAD') {
             return
           }
 
@@ -502,7 +510,7 @@ export default defineEventHandler(async (event) => {
         new Error(JSON.stringify({ statusCode: 400, message: 'Missing media mediaId' }))
 
         /*  const stream = Readable.toWeb(createReadStream(data.streamPath))
-         const [storageStream, playbackStream] = stream.tee()
+         const [storageStream, responseStream] = stream.tee()
  
          // Cache to Storage (fire-and-forget; errors are logged)
          r2PutFileStream(cacheKey, storageStream as ReadableStream, data.byteLength)
@@ -513,7 +521,7 @@ export default defineEventHandler(async (event) => {
              consola.error('Failed to save to cache', error)
            })
  
-         return playbackStream */
+         return responseStream */
       }
     }
   } catch (error) {
