@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.8.2
+
+[compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.8.1...v0.8.2)
+
+### 🩹 Fixes
+
+- Enhance media transformation with state management and timeout handling ([2677401](https://github.com/Modest-Human-Brands/mdrive/commit/2677401))
+
+### ❤️ Contributors
+
+- Shirsendu Bairagi ([@shba007](https://github.com/shba007))
+
 ## v0.8.1
 
 [compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.8.0...v0.8.1)
