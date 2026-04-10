@@ -243,7 +243,7 @@ export default defineEventHandler(async (event) => {
       })
 
       if (!data?.streamPath) {
-        new Error(JSON.stringify({ statusCode: 500, statusMessage: 'No stream generated' }))
+        throw new Error(JSON.stringify({ statusCode: 500, statusMessage: 'No stream generated' }))
       }
 
       const stream = Readable.toWeb(createReadStream(data.streamPath))
@@ -440,7 +440,7 @@ export default defineEventHandler(async (event) => {
         if (!mpd) {
           const mediaOriginId = (await syncDrive())[mediaId.split('_')[0]!]
           if (!mediaOriginId) {
-            new Error(JSON.stringify({ statusCode: 404, message: '🚧 Missing media' }))
+            throw new Error(JSON.stringify({ statusCode: 404, message: '🚧 Missing media' }))
           }
 
           consola.warn('⚠️ Video Cache MISS', { cacheKey })
@@ -459,7 +459,7 @@ export default defineEventHandler(async (event) => {
           })
 
           if (!data?.streamPath) {
-            new Error(JSON.stringify({ statusCode: 500, statusMessage: 'No stream generated' }))
+            throw new Error(JSON.stringify({ statusCode: 500, statusMessage: 'No stream generated' }))
           }
         }
 
@@ -507,7 +507,7 @@ export default defineEventHandler(async (event) => {
           return toClient
         }
 
-        new Error(JSON.stringify({ statusCode: 400, message: 'Missing media mediaId' }))
+        throw new Error(JSON.stringify({ statusCode: 400, message: 'Missing media mediaId' }))
 
         /*  const stream = Readable.toWeb(createReadStream(data.streamPath))
          const [storageStream, responseStream] = stream.tee()
@@ -530,6 +530,6 @@ export default defineEventHandler(async (event) => {
     }
 
     consola.error('Route media GET', error)
-    new Error(JSON.stringify({ statusCode: 500, message: 'Some Unknown Error Found' }))
+    throw new Error(JSON.stringify({ statusCode: 500, message: 'Some Unknown Error Found' }))
   }
 })

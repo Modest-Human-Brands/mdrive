@@ -18,6 +18,9 @@ export default defineConfig({
        region: '',
      }, */
   },
+  routeRules: {
+    '/media/**': { cors: true },
+  },
   runtimeConfig: {
     app: {
       version: '',
