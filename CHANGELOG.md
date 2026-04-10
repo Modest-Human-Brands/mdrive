@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.8.3
+
+[compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.8.2...v0.8.3)
+
+### 🩹 Fixes
+
+- Add CORS support for media routes, update dependencies, and improve error handling ([9052b18](https://github.com/Modest-Human-Brands/mdrive/commit/9052b18))
+
+### ❤️ Contributors
+
+- Shirsendu Bairagi ([@shba007](https://github.com/shba007))
+
 ## v0.8.2
 
 [compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.8.1...v0.8.2)
