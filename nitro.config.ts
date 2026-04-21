@@ -1,8 +1,8 @@
 import { defineConfig } from 'nitro'
 
 export default defineConfig({
-  compatibilityDate: 'latest',
-  serverDir: './',
+  compatibilityDate: '2026-04-17',
+  serverDir: './server',
   compressPublicAssets: true,
   storage: {
     fs: {

@@ -35,13 +35,9 @@
   "dependencies": {
     "aws4fetch": "^1.0.20",
     "busboy": "^1.6.0",
-    "execa": "^9.6.1",
-    "image-meta": "^0.2.2",
     "mime-types": "^3.0.2",
     "nitro": "^3.0.260311-beta",
-    "ofetch": "^1.5.1",
     "ohash": "^2.0.11",
-    "rolldown": "^1.0.0-rc.15",
     "undio": "^0.2.0",
     "unstorage": "^1.17.5",
     "zod": "^4.3.6"
