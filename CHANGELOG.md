@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.8.4
+
+[compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.8.3...v0.8.4)
+
+### 🩹 Fixes
+
+- Update Docker actions to latest versions adjust server directory, and add health check endpoint ([bb7ab9e](https://github.com/Modest-Human-Brands/mdrive/commit/bb7ab9e))
+
+### ❤️ Contributors
+
+- Shirsendu Bairagi ([@shba007](https://github.com/shba007))
+
 ## v0.8.3
 
 [compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.8.2...v0.8.3)
