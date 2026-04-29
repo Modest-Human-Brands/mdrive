@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.8.5
+
+[compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.8.4...v0.8.5)
+
+### 🩹 Fixes
+
+- Implement media handling routes for images, audio, and video with caching support ([aa72df2](https://github.com/Modest-Human-Brands/mdrive/commit/aa72df2))
+
+### ❤️ Contributors
+
+- Shirsendu Bairagi ([@shba007](https://github.com/shba007))
+
 ## v0.8.4
 
 [compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.8.3...v0.8.4)
