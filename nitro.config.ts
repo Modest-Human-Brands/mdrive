@@ -9,6 +9,10 @@ export default defineConfig({
       driver: 'fs',
       base: './static',
     },
+    data: {
+      driver: 'fs',
+      base: './.data',
+    },
     /*  r2: {
        driver: 's3',
        accessKeyId: '',

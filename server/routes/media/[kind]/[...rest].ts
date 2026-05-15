@@ -20,6 +20,7 @@ import r2Drive from '~/server/utils/r2-drive'
 import r2GetAllFiles from '~/server/utils/r2-get-all-files'
 import r2GetFileStream from '~/server/utils/r2-get-file-stream'
 import { generateMpd } from '~/server/utils/generate-mpd'
+import r2Cdn from '~/server/utils/r2-cdn'
 
 function normalizeArgs(rawArgs: string) {
   const decodedArgs = decodeURIComponent(rawArgs || '')
@@ -201,7 +202,7 @@ export default defineEventHandler(async (event) => {
 
       // R2 cache
       if (await r2.hasItem(cacheKey)) {
-        const data = await r2GetFileStream(cacheKey)
+        const data = await r2GetFileStream(r2Cdn, cacheKey)
         const [toDisk, toClient] = data.stream.tee()
 
         diskPutFileStream(cachePath, toDisk).then(() => {
@@ -250,7 +251,7 @@ export default defineEventHandler(async (event) => {
       const [_storageStream, responseStream] = stream.tee()
 
       // Cache to Storage (fire-and-forget; errors are logged)
-      /*  r2PutFileStream(cacheKey, storageStream as ReadableStream, data.byteLength)
+      /*  r2PutFileStream(r2Cdn, cacheKey, storageStream as ReadableStream, data.byteLength)
          .then(() => {
            consola.info('💾 Image Saved to R2 cache', { cacheKey, bytes: data.byteLength })
          })
@@ -332,7 +333,7 @@ export default defineEventHandler(async (event) => {
 
       // R2 cache
       if (await r2.hasItem(cacheKey)) {
-        const { stream, byteLength } = await r2GetFileStream(cacheKey)
+        const { stream, byteLength } = await r2GetFileStream(r2Cdn, cacheKey)
         const [diskStream, clientStream] = stream.tee()
 
         const rangeHeader = event.req.headers.get('range')
@@ -401,7 +402,7 @@ export default defineEventHandler(async (event) => {
       const [storageStream, responseStream] = stream.tee()
 
       // Cache to Storage (fire-and-forget; errors are logged)
-      r2PutFileStream(cacheKey, storageStream as ReadableStream, data.byteLength)
+      r2PutFileStream(r2Cdn,cacheKey, storageStream as ReadableStream, data.byteLength)
         .then(() => {
           consola.info('💾 Video Saved to R2 cache', { cacheKey, bytes: data.byteLength })
         })
@@ -492,7 +493,7 @@ export default defineEventHandler(async (event) => {
 
         // R2 cache
         if (await r2.hasItem(cacheKey)) {
-          const data = await r2GetFileStream(cacheKey)
+          const data = await r2GetFileStream(r2Cdn, cacheKey)
           const [toDisk, toClient] = data.stream.tee()
 
           diskPutFileStream(cachePath, toDisk).then(() => {
@@ -513,7 +514,7 @@ export default defineEventHandler(async (event) => {
          const [storageStream, responseStream] = stream.tee()
  
          // Cache to Storage (fire-and-forget; errors are logged)
-         r2PutFileStream(cacheKey, storageStream as ReadableStream, data.byteLength)
+         r2PutFileStream(r2Cdn, cacheKey, storageStream as ReadableStream, data.byteLength)
            .then(() => {
              consola.info('💾 Video Saved to R2 cache', { cacheKey, bytes: data.byteLength })
            })
