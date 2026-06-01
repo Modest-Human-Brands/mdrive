@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.8.6
+
+[compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.8.5...v0.8.6)
+
+### 🚀 Enhancements
+
+- Add data storage configuration and new media upload endpoints ([1a622f8](https://github.com/Modest-Human-Brands/mdrive/commit/1a622f8))
+- Implement media comments api with create and query functionality ([a555d60](https://github.com/Modest-Human-Brands/mdrive/commit/a555d60))
+
+### ❤️ Contributors
+
+- Shirsendu Bairagi ([@shba007](https://github.com/shba007))
+
 ## v0.8.5
 
 [compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.8.4...v0.8.5)
