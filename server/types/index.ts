@@ -16,6 +16,24 @@ export type Device = (typeof devices)[number]
 export const resolutions = ['1440p', '1080p', '720p'] as const
 export type Resolution = (typeof resolutions)[number]
 
+export const resourceTypes = ['project', 'media', 'contact'] as const
+
+export type ResourceType = (typeof resourceTypes)[number]
+
+export type NotionDB = { [K in ResourceType]: string }
+
+export interface ResourceRecordMap {
+  project: NotionProject
+  media: NotionMedia
+  contact: NotionContact
+}
+
+export interface Resource<T extends ResourceType = ResourceType> {
+  type: T
+  notificationStatus: boolean
+  record: ResourceRecordMap[T]
+}
+
 type NotionImage =
   | {
       type: 'file'
@@ -75,6 +93,7 @@ export interface NotionProject {
       type: 'date'
       date: {
         start: string
+        end: string
       }
     }
     Client: {
@@ -96,7 +115,7 @@ export interface NotionProject {
   public_url: null
 }
 
-export interface NotionAsset {
+export interface NotionMedia {
   id: string
   created_time: string
   last_edited_time: string
@@ -124,6 +143,16 @@ export interface NotionAsset {
     Slug: {
       type: 'formula'
       formula: { string: string }
+    }
+    'Project Slug': {
+      type: 'rollup'
+      rollup: {
+        array: {
+          formula: {
+            string: string
+          }
+        }[]
+      }
     }
     Description: {
       type: 'rich_text'
@@ -179,4 +208,86 @@ export interface NotionAsset {
       }[]
     }
   }
+}
+
+export interface NotionContact {
+  id: string
+  created_time: Date
+  last_edited_time: Date
+  cover: NotionImage
+  icon: NotionImage
+  properties: {
+    Name: {
+      type: 'title'
+      title: {
+        plain_text: string
+      }[]
+    }
+    Company: {
+      type: 'rich_text'
+      rich_text: {
+        text: {
+          content: string
+        }
+      }[]
+    }
+    Address: {
+      type: 'rich_text'
+      rich_text: {
+        text: {
+          content: string
+        }
+      }[]
+    }
+    Website: {
+      type: 'url'
+      url: string
+    }
+    Instagram: {
+      type: 'url'
+      url: string
+    }
+    LinkedIn: {
+      type: 'url'
+      url: string
+    }
+    'Point of Contact': {
+      type: 'select'
+      select: {
+        name: string
+        color: string
+      }
+    }
+    Email: {
+      type: 'email'
+      email: string
+    }
+    Whatsapp: {
+      type: 'phone_number'
+      phone_number: string
+    }
+    Phone: {
+      type: 'phone_number'
+      phone_number: string
+    }
+    Project: {
+      type: 'relation'
+      relation: { id: string }[]
+      has_more: boolean
+    }
+    Profit: {
+      type: 'rollup'
+      rollup: {
+        type: string
+        number: null
+        function: string
+      }
+    }
+    Organization: {
+      type: 'relation'
+      relation: { id: string }[]
+    }
+  }
+  url: string
+  public_url: null
 }

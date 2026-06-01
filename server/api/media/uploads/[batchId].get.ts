@@ -1,9 +1,11 @@
-import { defineEventHandler, getQuery, HTTPError } from 'nitro/h3'
+import { defineEventHandler, getValidatedRouterParams, HTTPError } from 'nitro/h3'
 import { useStorage } from 'nitro/storage'
+import { z } from 'zod'
+
+const pathParamsSchema = z.object({ batchId: z.string() })
 
 export default defineEventHandler(async (event) => {
-  const query = getQuery(event)
-  const batchId = query.batchId as string
+  const { batchId } = await getValidatedRouterParams(event, pathParamsSchema)
 
   if (!batchId) {
     throw new HTTPError({

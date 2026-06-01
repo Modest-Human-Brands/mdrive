@@ -1,9 +1,15 @@
 import { defineConfig } from 'nitro'
 
 export default defineConfig({
-  compatibilityDate: '2026-04-17',
   serverDir: './server',
   compressPublicAssets: true,
+  // imports: {},
+  experimental: {
+    tasks: true,
+  },
+  scheduledTasks: {
+    '*/1 * * * *': ['sync:resource'],
+  },
   storage: {
     fs: {
       driver: 'fs',
@@ -31,8 +37,9 @@ export default defineConfig({
       buildTime: '',
     },
     private: {
-      mediaUrl: '',
       notionDbId: '',
+      mediaUrl: '',
+      mconnectUrl: '',
       cdnR2AccessKeyId: '',
       cdnR2SecretAccessKey: '',
       cdnR2Endpoint: '',
