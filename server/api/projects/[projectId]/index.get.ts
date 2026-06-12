@@ -1,15 +1,7 @@
 import { defineEventHandler, getRouterParam, HTTPError } from 'nitro/h3'
 import { useStorage } from 'nitro/storage'
 import type { Resource } from '~/server/types'
-
-function formatBytes(bytes: number, decimals = 2) {
-  if (!+bytes) return '0 Bytes'
-  const k = 1024
-  const dm = Math.max(decimals, 0)
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return `${Number.parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
-}
+import formatBytes from '~/server/utils/format-bytes'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -18,8 +10,7 @@ export default defineEventHandler(async (event) => {
     const projectStorage = useStorage<Resource<'project'>>(`data:resource:project`)
     const mediaStorage = useStorage<Resource<'media'>>(`data:resource:media`)
 
-    const projectKeys = await projectStorage.getKeys()
-    const projects = (await projectStorage.getItems(projectKeys)).flatMap(({ value }) => value?.record || [])
+    const projects = (await projectStorage.getItems(await projectStorage.getKeys())).flatMap(({ value }) => value?.record || [])
     const project = projects.find(({ properties }) => properties.Slug.formula.string === projectId)
 
     if (!project) {

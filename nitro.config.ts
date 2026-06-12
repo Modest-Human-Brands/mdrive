@@ -8,7 +8,7 @@ export default defineConfig({
     tasks: true,
   },
   scheduledTasks: {
-    '*/1 * * * *': ['sync:resource'],
+    '*/5 * * * *': ['sync:resource'],
   },
   storage: {
     fs: {
