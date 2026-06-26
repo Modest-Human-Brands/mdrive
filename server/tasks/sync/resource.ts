@@ -18,6 +18,7 @@ export default defineTask({
   async run() {
     const config = useRuntimeConfig()
     const notionDbId = JSON.parse(config.private.notionDbId) as unknown as NotionDB
+
     const resources: Pick<ResourceQueries, 'contact' | 'project' | 'media'> = {
       contact: (await notionQueryDb<NotionContact>(notion, notionDbId.contact)).filter((a) => !!a),
       project: (await notionQueryDb<NotionProject>(notion, notionDbId.project)).filter((a) => !!a),

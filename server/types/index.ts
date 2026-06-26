@@ -96,7 +96,7 @@ export interface NotionProject {
         end: string
       }
     }
-    Client: {
+    Contact: {
       type: 'relation'
       relation: { id: string }[]
       has_more: boolean

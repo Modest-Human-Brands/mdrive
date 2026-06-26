@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
     const commentStorage = useStorage('data:comment')
     const createdComments = []
 
-    const now = new Date().toISOString()
+    const now = new Date().toDateString()
 
     for (const mediaId of mediaIds) {
       const commentId = `cmt_${randomUUID().slice(0, 8)}`
