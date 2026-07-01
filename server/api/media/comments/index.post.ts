@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
     const commentStorage = useStorage('data:comment')
     const createdComments = []
 
-    const now = new Date().toDateString()
+    const now = new Date().toISOString()
 
     for (const mediaId of mediaIds) {
       const commentId = `cmt_${randomUUID().slice(0, 8)}`
@@ -50,7 +50,8 @@ export default defineEventHandler(async (event) => {
       comments: createdComments,
     }
   } catch (error: any) {
-    console.error('API /media/comments POST Error:', error)
+    console.error('API /media/comments POST Error:', JSON.stringify(error, null, 2))
+
     throw new HTTPError({
       statusCode: error.statusCode || 500,
       statusMessage: error.statusMessage || 'Internal Server Error',

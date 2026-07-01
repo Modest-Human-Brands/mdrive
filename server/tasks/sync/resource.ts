@@ -1,10 +1,11 @@
 import { useRuntimeConfig } from 'nitro/runtime-config'
 import { useStorage } from 'nitro/storage'
 import { defineTask } from 'nitro/task'
+
+import type { ResourceType, ResourceRecordMap, NotionDB, NotionContact, NotionProject, NotionMedia, Resource, NotionOrganization } from '~/server/types'
 import notion from '~/server/utils/notion'
 import notionNormalizeId from '~/server/utils/notion-normalize-id'
 import notionQueryDb from '~/server/utils/notion-query-db'
-import type { ResourceType, ResourceRecordMap, NotionDB, NotionProject, NotionMedia, Resource, NotionContact } from '~/server/types'
 
 type ResourceQueries = {
   [K in ResourceType]: ResourceRecordMap[K][]
@@ -19,9 +20,13 @@ export default defineTask({
     const config = useRuntimeConfig()
     const notionDbId = JSON.parse(config.private.notionDbId) as unknown as NotionDB
 
-    const resources: Pick<ResourceQueries, 'contact' | 'project' | 'media'> = {
+    const resources: ResourceQueries = {
+      organization: (await notionQueryDb<NotionOrganization>(notion, notionDbId.organization)).filter((a) => !!a),
+      // user: (await notionQueryDb<NotionUser>(notion, notionDbId.user)).filter((a) => !!a),
       contact: (await notionQueryDb<NotionContact>(notion, notionDbId.contact)).filter((a) => !!a),
       project: (await notionQueryDb<NotionProject>(notion, notionDbId.project)).filter((a) => !!a),
+      // document: (await notionQueryDb<NotionDocument>(notion, notionDbId.document)).filter((a) => !!a),
+      // stream: (await notionQueryDb<NotionStream>(notion, notionDbId.stream)).filter((a) => !!a),
       media: (await notionQueryDb<NotionMedia>(notion, notionDbId.media)).filter((a) => !!a),
     }
     const results = await Promise.allSettled(Object.values(resources))

@@ -36,9 +36,11 @@ export default defineConfig({
       version: '',
       buildTime: '',
     },
+    public: {
+      mediaUrl: '',
+    },
     private: {
       notionDbId: '',
-      mediaUrl: '',
       mconnectUrl: '',
       cdnR2AccessKeyId: '',
       cdnR2SecretAccessKey: '',

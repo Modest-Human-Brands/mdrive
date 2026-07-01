@@ -2,7 +2,7 @@ import { defineEventHandler, getRouterParam, HTTPError, readValidatedBody } from
 import { useStorage } from 'nitro/storage'
 import { useRuntimeConfig } from 'nitro/runtime-config'
 import { z } from 'zod'
-import { ofetch } from 'ofetch'
+import { $fetch } from 'ofetch'
 
 import type { Resource } from '~/server/types'
 import notion from '~/server/utils/notion'
@@ -53,7 +53,7 @@ export default defineEventHandler(async (event) => {
         const contacts = (await contactStorage.getItems(await contactStorage.getKeys())).flatMap(({ value }) => value?.record || [])
         const filteredClient = contacts.find((c) => c.id === contactId)
 
-        await ofetch('/api/connect/text/email/send', {
+        await $fetch('/api/connect/text/email/send', {
           baseURL: config.private.mconnectUrl,
           method: 'POST',
           body: {

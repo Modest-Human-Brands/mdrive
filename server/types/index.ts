@@ -16,13 +16,14 @@ export type Device = (typeof devices)[number]
 export const resolutions = ['1440p', '1080p', '720p'] as const
 export type Resolution = (typeof resolutions)[number]
 
-export const resourceTypes = ['project', 'media', 'contact'] as const
+export const resourceTypes = ['organization', 'project', 'media', 'contact'] as const
 
 export type ResourceType = (typeof resourceTypes)[number]
 
 export type NotionDB = { [K in ResourceType]: string }
 
 export interface ResourceRecordMap {
+  organization: NotionOrganization
   project: NotionProject
   media: NotionMedia
   contact: NotionContact
@@ -50,72 +51,7 @@ type NotionImage =
     }
   | null
 
-export interface NotionProject {
-  id: string
-  created_time: Date
-  last_edited_time: Date
-  cover: NotionImage
-  icon: NotionImage
-  properties: {
-    Index: {
-      type: 'number'
-      number: number
-    }
-    Name: {
-      type: 'title'
-      title: {
-        plain_text: string
-      }[]
-    }
-    Slug: {
-      type: 'formula'
-      formula: { string: string }
-    }
-    Status: {
-      type: 'status'
-      status: {
-        name: 'Plan' | 'Quotation' | 'Shoot' | 'Edit' | 'Delivered'
-      }
-    }
-    Quotation: {
-      type: 'number'
-      number: number
-    }
-    Address: {
-      type: 'rich_text'
-      rich_text: {
-        text: {
-          content: string
-        }
-      }[]
-    }
-    Date: {
-      type: 'date'
-      date: {
-        start: string
-        end: string
-      }
-    }
-    Contact: {
-      type: 'relation'
-      relation: { id: string }[]
-      has_more: boolean
-    }
-    Budget: {
-      type: 'number'
-      number: number
-    }
-    Asset: {
-      type: 'relation'
-      relation: { id: string }[]
-      has_more: boolean
-    }
-  }
-  url: string
-  public_url: null
-}
-
-export interface NotionMedia {
+export interface NotionOrganization {
   id: string
   created_time: string
   last_edited_time: string
@@ -126,35 +62,11 @@ export interface NotionMedia {
       type: 'number'
       number: number
     }
-    'Project Index': {
-      type: 'rollup'
-      rollup: {
-        array: {
-          number: number
-        }[]
-      }
-    }
     Name: {
       type: 'title'
-      title: {
-        plain_text: string
-      }[]
+      title: { plain_text: string }[]
     }
-    Slug: {
-      type: 'formula'
-      formula: { string: string }
-    }
-    'Project Slug': {
-      type: 'rollup'
-      rollup: {
-        array: {
-          formula: {
-            string: string
-          }
-        }[]
-      }
-    }
-    Description: {
+    Id: {
       type: 'rich_text'
       rich_text: {
         text: {
@@ -162,50 +74,121 @@ export interface NotionMedia {
         }
       }[]
     }
-    Type: {
-      type: 'select'
-      select: {
-        name: 'Photo' | 'Video'
-      }
+    Phone: {
+      type: 'phone_number'
+      phone_number: string
     }
-    Status: {
+    Whatsapp: {
+      type: 'url'
+      url: string
+    }
+    Website: {
+      type: 'url'
+      url: string
+    }
+    Branding: {
+      type: 'rich_text'
+      rich_text: {
+        text: {
+          content: string
+        }
+      }[]
+    }
+    'Legal Name': {
+      type: 'rich_text'
+      rich_text: {
+        text: {
+          content: string
+        }
+      }[]
+    }
+    'Entity Type': {
       type: 'select'
-      status: {
-        name: 'Plan' | 'Draft' | 'Release' | 'Archive'
-      }
+      select: { name: string } | null
+    }
+    'Trade Relationship': {
+      type: 'select'
+      select: { name: string } | null
+    }
+    GSTIN: {
+      type: 'rich_text'
+      rich_text: {
+        text: {
+          content: string
+        }
+      }[]
+    }
+    PAN: {
+      type: 'rich_text'
+      rich_text: {
+        text: {
+          content: string
+        }
+      }[]
+    }
+    Address: {
+      type: 'rich_text'
+      rich_text: {
+        text: {
+          content: string
+        }
+      }[]
+    }
+    'Account Details': {
+      type: 'rich_text'
+      rich_text: {
+        text: {
+          content: string
+        }
+      }[]
+    }
+    'Contact Email': {
+      type: 'email'
+      email: string | null
+    }
+    'Billing Email': {
+      type: 'email'
+      email: string | null
+    }
+    'Founded Year': {
+      type: 'number'
+      number: number
+    }
+    'Social Links': {
+      type: 'rich_text'
+      rich_text: {
+        text: {
+          content: string
+        }
+      }[]
+    }
+    'Primary Contact': {
+      type: 'relation'
+      relation: { id: string }[]
+    }
+    'Organization Members': {
+      type: 'relation'
+      relation: { id: string }[]
+    }
+    Contact: {
+      type: 'relation'
+      relation: { id: string }[]
+    }
+    Interactions: {
+      type: 'relation'
+      relation: { id: string }[]
     }
     Project: {
       type: 'relation'
       relation: { id: string }[]
-      has_more: false
     }
-    Gallery: {
-      type: 'checkbox'
-      checkbox: boolean
+    Document: {
+      type: 'relation'
+      relation: { id: string }[]
     }
-    Featured: {
-      type: 'number'
-      number: number
-    }
-    Resolution: {
-      type: 'select'
-      select: {
-        name: Resolution
-      }
-    }
-    'Aspect ratio': {
-      type: 'select'
-      select: {
-        name: AspectRatio
-      }
-    }
-    Additional: {
-      type: 'rich_text'
-      rich_text: {
-        text: {
-          content: string
-        }
-      }[]
+    Asset: {
+      type: 'relation'
+      relation: { id: string }[]
     }
   }
 }
@@ -290,4 +273,174 @@ export interface NotionContact {
   }
   url: string
   public_url: null
+}
+
+export interface NotionProject {
+  id: string
+  created_time: Date
+  last_edited_time: Date
+  cover: NotionImage
+  icon: NotionImage
+  properties: {
+    Index: {
+      type: 'number'
+      number: number
+    }
+    Name: {
+      type: 'title'
+      title: {
+        plain_text: string
+      }[]
+    }
+    Slug: {
+      type: 'formula'
+      formula: { string: string }
+    }
+    Status: {
+      type: 'status'
+      status: {
+        name: 'Plan' | 'Quotation' | 'Shoot' | 'Edit' | 'Delivered'
+      }
+    }
+    Quotation: {
+      type: 'number'
+      number: number
+    }
+    Address: {
+      type: 'rich_text'
+      rich_text: {
+        text: {
+          content: string
+        }
+      }[]
+    }
+    Date: {
+      type: 'date'
+      date: {
+        start: string
+        end: string
+      }
+    }
+    Contact: {
+      type: 'relation'
+      relation: { id: string }[]
+      has_more: boolean
+    }
+    Budget: {
+      type: 'number'
+      number: number
+    }
+    Asset: {
+      type: 'relation'
+      relation: { id: string }[]
+      has_more: boolean
+    }
+  }
+  url: string
+  public_url: null
+}
+
+export interface NotionMedia {
+  id: string
+  created_time: string
+  last_edited_time: string
+  cover: NotionImage
+  icon: NotionImage
+  properties: {
+    'Project Index': {
+      type: 'rollup'
+      rollup: {
+        array: {
+          number: number
+        }[]
+      }
+    }
+    Index: {
+      type: 'number'
+      number: number
+    }
+    Name: {
+      type: 'title'
+      title: {
+        plain_text: string
+      }[]
+    }
+    Slug: {
+      type: 'formula'
+      formula: { string: string }
+    }
+    Description: {
+      type: 'rich_text'
+      rich_text: {
+        text: {
+          content: string
+        }
+      }[]
+    }
+    Type: {
+      type: 'select'
+      select: {
+        name: 'Photo' | 'Video'
+      }
+    }
+    Segment: {
+      type: 'select'
+      select: {
+        name: Category
+      }
+    }
+    Status: {
+      type: 'status'
+      status: {
+        name: 'Plan' | 'Draft' | 'Release' | 'Archive'
+      }
+    }
+    Project: {
+      type: 'relation'
+      relation: { id: string }[]
+      has_more: false
+    }
+    'Project Slug': {
+      type: 'rollup'
+      rollup: {
+        array: {
+          formula: {
+            string: string
+          }
+        }[]
+      }
+    }
+    Gallery: {
+      type: 'checkbox'
+      checkbox: boolean
+    }
+    Featured: {
+      type: 'number'
+      number: number
+    }
+    Resolution: {
+      type: 'select'
+      select: {
+        name: Resolution
+      }
+    }
+    'Aspect ratio': {
+      type: 'select'
+      select: {
+        name: AspectRatio
+      }
+    }
+    Additional: {
+      type: 'rich_text'
+      rich_text: {
+        text: {
+          content: string
+        }
+      }[]
+    }
+    Organization: {
+      type: 'relation'
+      relation: { id: string }[]
+    }
+  }
 }

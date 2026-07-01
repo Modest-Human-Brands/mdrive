@@ -2,16 +2,16 @@ import { defineEventHandler, getRouterParam, HTTPError } from 'nitro/h3'
 import { useStorage } from 'nitro/storage'
 import type { Resource } from '~/server/types'
 import formatBytes from '~/server/utils/format-bytes'
+import notionNormalizeId from '~/server/utils/notion-normalize-id'
 
 export default defineEventHandler(async (event) => {
   try {
-    const projectId = getRouterParam(event, 'projectId')!.toString().replace(/,$/, '')
+    const projectId = notionNormalizeId(getRouterParam(event, 'projectId')!.toString().replace(/,$/, ''))
 
-    const projectStorage = useStorage<Resource<'project'>>(`data:resource:project`)
-    const mediaStorage = useStorage<Resource<'media'>>(`data:resource:media`)
+    const projectStorage = useStorage<Resource<'project'>>('data:resource:project')
+    const mediaStorage = useStorage<Resource<'media'>>('data:resource:media')
 
-    const projects = (await projectStorage.getItems(await projectStorage.getKeys())).flatMap(({ value }) => value?.record || [])
-    const project = projects.find(({ properties }) => properties.Slug.formula.string === projectId)
+    const project = await projectStorage.getItem(projectId)
 
     if (!project) {
       throw new HTTPError({ statusCode: 404, statusMessage: 'Project not found' })
@@ -19,23 +19,25 @@ export default defineEventHandler(async (event) => {
 
     const mediaKeys = await mediaStorage.getKeys()
     const allMedia = (await mediaStorage.getItems(mediaKeys)).flatMap(({ value }) => value?.record || [])
-    const projectMedia = allMedia.filter((m) => m.properties['Project Slug']?.rollup?.array[0]?.formula?.string === projectId)
+    const projectMedia = allMedia.filter(({ properties }) => properties['Project Slug']?.rollup?.array[0]?.formula?.string === project.record.properties.Slug.formula.string)
+
+    const baseApproval = () => ({ total: 0, plan: 0, draft: 0, approved: 0, notApproved: 0, release: 0, archive: 0 })
 
     const stats = {
       totals: { count: 0, storageBytes: 0, humanReadableStorage: '0 Bytes' },
       breakdown: {
-        photo: { count: 0, storageBytes: 0, humanReadableStorage: '0 Bytes', approval: { total: 0, approved: 0, notApproved: 0, pending: 0 } },
-        video: { count: 0, storageBytes: 0, humanReadableStorage: '0 Bytes', approval: { total: 0, approved: 0, notApproved: 0, pending: 0 } },
-        audio: { count: 0, storageBytes: 0, humanReadableStorage: '0 Bytes', approval: { total: 0, approved: 0, notApproved: 0, pending: 0 } },
+        photo: { count: 0, storageBytes: 0, humanReadableStorage: '0 Bytes', approval: baseApproval() },
+        video: { count: 0, storageBytes: 0, humanReadableStorage: '0 Bytes', approval: baseApproval() },
+        audio: { count: 0, storageBytes: 0, humanReadableStorage: '0 Bytes', approval: baseApproval() },
       },
     }
 
-    for (const m of projectMedia) {
-      const rawType = m.properties.Type?.select?.name?.toLowerCase() || 'photo'
+    for (const media of projectMedia) {
+      const rawType = media.properties.Type?.select?.name?.toLowerCase() || 'photo'
       const type = (['photo', 'video', 'audio'].includes(rawType) ? rawType : 'photo') as 'photo' | 'video' | 'audio'
-      const status = m.properties.Status?.status?.name?.toLowerCase() || 'pending'
+      const status = media.properties.Status?.status?.name?.toLowerCase() || 'draft'
 
-      const sizeBytes = m.properties.Size?.number || 5_000_000
+      const sizeBytes = media.properties.Size?.number || 5_000_000
 
       stats.totals.count += 1
       stats.totals.storageBytes += sizeBytes
@@ -45,12 +47,44 @@ export default defineEventHandler(async (event) => {
       category.storageBytes += sizeBytes
       category.approval.total += 1
 
-      if (status === 'approved') {
-        category.approval.approved += 1
-      } else if (status === 'not approved' || status === 'rejected') {
-        category.approval.notApproved += 1
-      } else {
-        category.approval.pending += 1
+      // Route the status precisely to the requested tracking keys
+      switch (status) {
+        case 'plan': {
+          category.approval.plan += 1
+
+          break
+        }
+        case 'draft': {
+          category.approval.draft += 1
+
+          break
+        }
+        case 'approved': {
+          category.approval.approved += 1
+
+          break
+        }
+        case 'not approved':
+        case 'notapproved':
+        case 'rejected': {
+          category.approval.notApproved += 1
+
+          break
+        }
+        case 'release': {
+          category.approval.release += 1
+
+          break
+        }
+        case 'archive': {
+          category.approval.archive += 1
+
+          break
+        }
+        default: {
+          // Fallback for any unknown, legacy 'pending', or blank statuses
+          category.approval.draft += 1
+        }
       }
     }
 
@@ -62,12 +96,12 @@ export default defineEventHandler(async (event) => {
     return {
       id: projectId,
       orgId: 'org_red-cat-pictures-1',
-      name: project.properties.Name?.title?.[0]?.plain_text || 'Untitled Project',
-      status: project.properties.Status?.status?.name?.toLowerCase() || 'active',
-      createdAt: project.created_time,
-      updatedAt: project.last_edited_time,
+      name: project.record.properties.Name?.title?.[0]?.plain_text || 'Untitled Project',
+      status: project.record.properties.Status?.status?.name?.toLowerCase() || 'active',
+      createdAt: project.record.created_time,
+      updatedAt: project.record.last_edited_time,
       config: {
-        watermarkEnabled: project.properties.Watermark?.checkbox || true,
+        watermarkEnabled: project.record.properties.Watermark?.checkbox || true,
       },
       mediaSummary: stats,
     }

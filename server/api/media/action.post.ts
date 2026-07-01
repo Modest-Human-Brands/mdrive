@@ -52,7 +52,7 @@ export default defineEventHandler(async (event) => {
       // ==========================================
       case 'approve': {
         const formattedStatus = body.params.status.charAt(0).toUpperCase() + body.params.status.slice(1)
-        const now = new Date().toDateString()
+        const now = new Date().toISOString()
 
         await Promise.all(
           body.mediaIds.map((id) =>
