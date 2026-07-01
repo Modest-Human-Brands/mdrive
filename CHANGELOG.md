@@ -1,5 +1,26 @@
 # Changelog
 
+## v0.9.0
+
+[compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.8.6...v0.9.0)
+
+### 🚀 Enhancements
+
+- Update sync interval to every 5 minutes and refactor byte formatting utility ([fa696d5](https://github.com/Modest-Human-Brands/mdrive/commit/fa696d5))
+- ⚠️ Enhance project and media management with organization structure and improved status handling ([e22c4ca](https://github.com/Modest-Human-Brands/mdrive/commit/e22c4ca))
+
+### 🏡 Chore
+
+- Update dependencies and fix types ([6b54cc7](https://github.com/Modest-Human-Brands/mdrive/commit/6b54cc7))
+
+#### ⚠️ Breaking Changes
+
+- ⚠️ Enhance project and media management with organization structure and improved status handling ([e22c4ca](https://github.com/Modest-Human-Brands/mdrive/commit/e22c4ca))
+
+### ❤️ Contributors
+
+- Shirsendu Bairagi ([@shba007](https://github.com/shba007))
+
 ## v0.8.6
 
 [compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.8.5...v0.8.6)
