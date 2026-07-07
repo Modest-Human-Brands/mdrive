@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.9.1
+
+[compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.9.0...v0.9.1)
+
+### 🩹 Fixes
+
+- Update .prettierignore to reflect correct dev/build outputs for Nitro ([0d394e2](https://github.com/Modest-Human-Brands/mdrive/commit/0d394e2))
+
+### ❤️ Contributors
+
+- Shirsendu Bairagi ([@shba007](https://github.com/shba007))
+
 ## v0.9.0
 
 [compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.8.6...v0.9.0)
