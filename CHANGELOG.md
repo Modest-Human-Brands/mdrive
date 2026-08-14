@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.10.0
+
+[compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.9.1...v0.10.0)
+
+### 🚀 Enhancements
+
+- ⚠️ Integrate nitro-mcp-toolkit and add health tool ([2dfb309](https://github.com/Modest-Human-Brands/mdrive/commit/2dfb309))
+
+#### ⚠️ Breaking Changes
+
+- ⚠️ Integrate nitro-mcp-toolkit and add health tool ([2dfb309](https://github.com/Modest-Human-Brands/mdrive/commit/2dfb309))
+
+### ❤️ Contributors
+
+- Shirsendu Bairagi ([@shba007](https://github.com/shba007))
+
 ## v0.9.1
 
 [compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.9.0...v0.9.1)
