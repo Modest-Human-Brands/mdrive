@@ -1,4 +1,4 @@
-import { defineEventHandler, getValidatedRouterParams, H3Event, HTTPError, type EventHandlerRequest } from 'nitro/h3'
+import { defineEventHandler, getValidatedRouterParams, H3Event, HTTPError, redirect, type EventHandlerRequest } from 'nitro/h3'
 import { defineCachedFunction } from 'nitro/cache'
 import { useRuntimeConfig } from 'nitro/runtime-config'
 import { useStorage } from 'nitro/storage'
@@ -160,6 +160,17 @@ export default defineEventHandler(async (event) => {
     const { kind, rest } = await getValidatedRouterParams(event, z.object({ kind: z.enum(['image', 'audio', 'video']), rest: z.string().min(1) }).parse)
     const [rawArgs, rawMediaId] = rest.split('/')
     const mediaId = rawMediaId!.replace(/\.[^.]+$/, '')
+
+    /*    TEMP    */
+    console.log({ kind, rest })
+
+    // 2. Construct your target CDN URL
+    const targetUrl = `https://cdn.redcatpictures.com/media/${kind}/${rest}`
+
+    // 3. Redirect the client directly to the asset
+    // 302 is the default for a temporary redirect, which is usually best for media URLs
+    return redirect(targetUrl, 302)
+    /*    TEMP    */
 
     if (!mediaId) new HTTPError({ statusCode: 400, message: 'Missing media mediaId' })
 
