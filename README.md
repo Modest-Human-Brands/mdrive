@@ -116,7 +116,7 @@ Configuration is managed via environment variables defined in `.env`:
 | `NITRO_PRIVATE_NOTION_DB_ID`               | `JSON string` | **Yes**  | JSON mapping of database IDs: `{"organization":"...","project":"...","media":"...","contact":"..."}`. |
 | `NITRO_PUBLIC_SITE_URL`                    | `string`      |    No    | Base public URL of the application.                                                                   |
 | `NITRO_SESSION_PASSWORD`                   | `string`      |    No    | Encryption secret for Nitro session handling.                                                         |
-| `NITRO_PRIVATE_SERVER_VALIDATION_KEY`      | `string`      |    No    | Shared secret for internal service-to-service validation.                                             |
+| `NITRO_PRIVATE_SERVER_VALIDATION_KEY`      | `string`      | **Yes**  | Shared API key. Clients send it in the `x-api-key` header.                                            |
 | `NITRO_PRIVATE_MEDIA_REDIRECT_URL`         | `string`      | **Yes**  | Base URL that `GET /media/:kind/**` redirects (302) to, e.g. `https://cdn.example.com`.               |
 | `NITRO_PRIVATE_STEGANOGRAPHY_KEY`          | `string`      |    No    | Encryption key for invisible image watermarking.                                                      |
 | `NITRO_PRIVATE_DRIVE_R2_ENDPOINT`          | `string`      | **Yes**  | S3 API endpoint for Cloudflare R2 primary storage.                                                    |
@@ -136,6 +136,8 @@ Configuration is managed via environment variables defined in `.env`:
 ---
 
 ## API Specifications
+
+All `/api/**` and `/webhook/**` endpoints (except `GET /api/health`) require an `x-api-key` header matching `NITRO_PRIVATE_SERVER_VALIDATION_KEY`: missing key returns `401`, wrong key `403`, and an unset server key `500`. `/media/**` is public.
 
 All endpoints return JSON responses unless streaming media content. Route parameters and request bodies are strictly validated with [Zod](https://zod.dev).
 

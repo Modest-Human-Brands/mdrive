@@ -10,3 +10,8 @@ values:
     enabled: true
     type: default
     description: Organization slug sent as the x-org-id header
+  - key: api_key
+    value: ''
+    enabled: true
+    type: secret
+    description: Value of NITRO_PRIVATE_SERVER_VALIDATION_KEY sent as x-api-key

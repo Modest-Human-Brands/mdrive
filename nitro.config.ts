@@ -1,9 +1,13 @@
+import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'nitro'
 import mcp from 'nitro-mcp-toolkit/module'
 
 export default defineConfig({
   modules: [mcp()],
   serverDir: './server',
+  alias: {
+    '~': fileURLToPath(new URL('.', import.meta.url)),
+  },
   compressPublicAssets: true,
   // imports: {},
   experimental: {
@@ -45,6 +49,7 @@ export default defineConfig({
       notionDbId: '',
       mconnectUrl: '',
       mediaRedirectUrl: '',
+      serverValidationKey: '',
       cdnR2AccessKeyId: '',
       cdnR2SecretAccessKey: '',
       cdnR2Endpoint: '',

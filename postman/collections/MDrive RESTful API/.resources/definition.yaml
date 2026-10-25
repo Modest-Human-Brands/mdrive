@@ -50,3 +50,12 @@ description: |-
   [Using variables](https://learning.postman.com/docs/sending-requests/variables/)  
   [Managing environments](https://learning.postman.com/docs/sending-requests/managing-environments/)  
   [Writing scripts](https://learning.postman.com/docs/writing-scripts/intro-to-scripts/)
+auth:
+  type: apikey
+  credentials:
+    - key: key
+      value: x-api-key
+    - key: value
+      value: '{{api_key}}'
+    - key: in
+      value: header
