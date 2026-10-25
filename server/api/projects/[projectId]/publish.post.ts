@@ -1,12 +1,10 @@
 import { defineEventHandler, getRouterParam, HTTPError, readValidatedBody } from 'nitro/h3'
 import { useStorage } from 'nitro/storage'
-import { useRuntimeConfig } from 'nitro/runtime-config'
 import { z } from 'zod'
-import { $fetch } from 'ofetch'
 
 import type { Resource } from '~/server/types'
 import notion from '~/server/utils/notion'
-import notionTextStringify from '~/server/utils/notion-text-stringify'
+import notionNormalizeId from '~/server/utils/notion-normalize-id'
 
 const publishSchema = z.object({
   notify: z.boolean(),
@@ -14,19 +12,13 @@ const publishSchema = z.object({
 
 export default defineEventHandler(async (event) => {
   try {
-    const projectId = getRouterParam(event, 'projectId')!.toString().replace(/,$/, '')
+    const projectId = notionNormalizeId(getRouterParam(event, 'projectId')!.toString().replace(/,$/, ''))
 
     const { notify } = await readValidatedBody(event, publishSchema)
 
     const projectStorage = useStorage<Resource<'project'>>(`data:resource:project`)
-    const contactStorage = useStorage<Resource<'contact'>>(`data:resource:contact`)
 
-    const projectKeys = await projectStorage.getKeys()
-    const projects = (await projectStorage.getItems(projectKeys)).flatMap(({ value }) => value?.record || [])
-
-    const config = useRuntimeConfig()
-
-    const filteredProject = projects.find(({ properties }) => properties.Slug.formula.string === projectId)
+    const filteredProject = (await projectStorage.getItem(projectId))?.record
 
     if (!filteredProject) {
       throw new HTTPError({ statusCode: 404, statusMessage: 'Project not found' })
@@ -44,6 +36,7 @@ export default defineEventHandler(async (event) => {
       },
     })
 
+    /* Migrate to Modest Human Brands
     if (notify) {
       console.log(`[DISPATCH] Sending Email via MConnect API`)
 
@@ -53,7 +46,7 @@ export default defineEventHandler(async (event) => {
         const contacts = (await contactStorage.getItems(await contactStorage.getKeys())).flatMap(({ value }) => value?.record || [])
         const filteredClient = contacts.find((c) => c.id === contactId)
 
-        await $fetch('/api/connect/text/email/send', {
+        await $fetch('/api/interaction/email/send', {
           baseURL: config.private.mconnectUrl,
           method: 'POST',
           body: {
@@ -73,21 +66,50 @@ export default defineEventHandler(async (event) => {
                 },
               ],
               organization: {
-                id: 'red-cat-pictures',
-                name: 'RED CAT PICTURES',
-                website: 'https://redcatpictures.com',
+                id: 'modest-human-brands',
+                name: 'Modest Human Brands',
+                legalName: 'Modest Human Brands LLP',
+                entityType: 'LLP',
+                tradeRelationship: 'Primary',
+                gstin: undefined,
+                pan: 'ABCDE0123F',
+                address: '17 NO, N S Road,harinavi Beltola, South 24 Parganas, West Bengal, India',
+                foundedYear: 2025,
+                accountDetails: {
+                  accountName: 'Modest Human Brands LLP',
+                  accountNumber: 1_234_567_890,
+                  bankName: 'HDFC Bank',
+                  ifscCode: 'HDFC0001234',
+                },
+                website: 'https://modesthumanbrands.com',
+                contactEmail: 'contact@modesthumanbrands.com',
+                billingEmail: 'billing@modesthumanbrands.com',
+                primaryContactId: 'contact-1',
+                organizationMemberIds: ['member-1'],
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
                 branding: {
-                  logo: 'https://redcatpictures.com/logo-dark.svg',
-                  color: { primary: '#CD2D2D', accent: '#000000' },
+                  logo: 'https://modesthumanbrands.com/logo.svg',
+                  color: {
+                    primary: '#111827',
+                    accent: '#5945EA',
+                  },
                   font: 'Exo2',
                 },
-                socials: {},
+                phone: '+919999999999',
+                whatsapp: '+919999999999',
+                socials: {
+                  instagram: 'https://www.instagram.com/modesthumanbrands/',
+                  facebook: 'https://facebook.com/modesthumanbrands',
+                  linkedin: 'https://linkedin.com/company/modest-human-brands',
+                  youtube: 'https://www.youtube.com/@modesthumanbrands',
+                },
               },
             },
           },
         })
       }
-    }
+    } */
 
     return {
       notify,

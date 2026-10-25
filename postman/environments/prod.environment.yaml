@@ -1,0 +1,7 @@
+name: prod
+values:
+  - key: base_url
+    value: 'https://drive.modesthumanbrands.com'
+    enabled: true
+    type: default
+    description: MDrive API base URL

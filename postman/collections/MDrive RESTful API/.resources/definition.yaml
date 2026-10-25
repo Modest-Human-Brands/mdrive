@@ -1,0 +1,52 @@
+$kind: collection
+description: |-
+  # 🚀 Get started here
+
+  This collection guides you through CRUD operations (GET, POST, PUT, DELETE), variables, and tests.
+
+  ## 🔖 **How to use this collection**
+
+  #### **Step 1: Send requests**
+
+  RESTful APIs allow you to perform CRUD operations using the POST, GET, PUT, and DELETE HTTP methods.
+
+  This collection contains each of these request types. Open each request and click "Send" to see what happens.
+
+  #### **Step 2: View responses**
+
+  Observe the response tab for status code (200 OK), response time, and size.
+
+  #### **Step 3: Send new Body data**
+
+  Update or add new data in "Body" in the POST request. Typically, Body data is also used in PUT and PATCH requests.
+
+  ```
+  {
+      "name": "Add your name in the body"
+  }
+
+  ```
+
+  #### **Step 4: Update the variable**
+
+  Variables enable you to store and reuse values in Postman. We have created a variable called `base_url` with the sample request [https://postman-api-learner.glitch.me](https://postman-api-learner.glitch.me). Replace it with your API endpoint to customize this collection.
+
+  #### **Step 5: Add tests in the "Tests" tab**
+
+  Tests help you confirm that your API is working as expected. You can write test scripts in JavaScript and view the output in the "Test Results" tab.
+
+  <img src="https://content.pstmn.io/b5f280a7-4b09-48ec-857f-0a7ed99d7ef8/U2NyZWVuc2hvdCAyMDIzLTAzLTI3IGF0IDkuNDcuMjggUE0ucG5n">
+
+  ## 💪 Pro tips
+
+  - Use folders to group related requests and organize the collection.
+  - Add more scripts in "Tests" to verify if the API works as expected and execute flows.
+      
+
+  ## ℹ️ Resources
+
+  [Building requests](https://learning.postman.com/docs/sending-requests/requests/)  
+  [Authorizing requests](https://learning.postman.com/docs/sending-requests/authorization/)  
+  [Using variables](https://learning.postman.com/docs/sending-requests/variables/)  
+  [Managing environments](https://learning.postman.com/docs/sending-requests/managing-environments/)  
+  [Writing scripts](https://learning.postman.com/docs/writing-scripts/intro-to-scripts/)

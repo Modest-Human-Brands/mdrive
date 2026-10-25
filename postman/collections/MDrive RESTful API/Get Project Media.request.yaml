@@ -1,0 +1,26 @@
+$kind: http-request
+description: |-
+  This is a GET request and it is used to "get" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).
+
+  A successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data.
+url: '{{base_url}}/api/projects/:projectId/media?status=release'
+method: GET
+queryParams:
+  - key: status
+    value: release
+  - key: page
+    value: '2'
+    disabled: true
+  - key: limit
+    value: '12'
+    disabled: true
+pathVariables:
+  projectId: 304ee3b0-289a-81f5-9261-c410967f5a36
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () {
+          pm.response.to.have.status(200);
+      });
+    language: text/javascript
+order: 8000

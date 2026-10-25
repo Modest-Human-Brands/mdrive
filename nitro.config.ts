@@ -10,7 +10,7 @@ export default defineConfig({
     tasks: true,
   },
   scheduledTasks: {
-    '*/5 * * * *': ['sync:resource'],
+    '10,25,40,55 * * * *': ['sync:resource'],
   },
   storage: {
     fs: {
@@ -44,6 +44,7 @@ export default defineConfig({
     private: {
       notionDbId: '',
       mconnectUrl: '',
+      mediaRedirectUrl: '',
       cdnR2AccessKeyId: '',
       cdnR2SecretAccessKey: '',
       cdnR2Endpoint: '',

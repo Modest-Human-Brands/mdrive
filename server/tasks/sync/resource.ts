@@ -1,15 +1,28 @@
 import { useRuntimeConfig } from 'nitro/runtime-config'
 import { useStorage } from 'nitro/storage'
 import { defineTask } from 'nitro/task'
+import pThrottle from 'p-throttle'
+import pRetry, { AbortError } from 'p-retry'
 
-import type { ResourceType, ResourceRecordMap, NotionDB, NotionContact, NotionProject, NotionMedia, Resource, NotionOrganization } from '~/server/types'
+import type { NotionDB } from '~/server/types'
 import notion from '~/server/utils/notion'
 import notionNormalizeId from '~/server/utils/notion-normalize-id'
 import notionQueryDb from '~/server/utils/notion-query-db'
 
-type ResourceQueries = {
-  [K in ResourceType]: ResourceRecordMap[K][]
-}
+const throttle = pThrottle({
+  limit: 2,
+  interval: 1000,
+})
+
+const throttledNotion = throttle((task: () => Promise) =>
+  pRetry(task, {
+    retries: 3,
+    onFailedAttempt: (error: any) => {
+      const isRateLimited = error?.status === 429 || error?.code === 'rate_limited'
+      if (!isRateLimited) throw new AbortError(error)
+    },
+  })
+) as (task: () => Promise) => Promise
 
 export default defineTask({
   meta: {
@@ -17,42 +30,54 @@ export default defineTask({
     description: 'Sync Notion Resources into cache',
   },
   async run() {
-    const config = useRuntimeConfig()
-    const notionDbId = JSON.parse(config.private.notionDbId) as unknown as NotionDB
+    const startTime = Date.now()
+    console.info('[sync:resource] Starting resource synchronization...')
 
-    const resources: ResourceQueries = {
-      organization: (await notionQueryDb<NotionOrganization>(notion, notionDbId.organization)).filter((a) => !!a),
-      // user: (await notionQueryDb<NotionUser>(notion, notionDbId.user)).filter((a) => !!a),
-      contact: (await notionQueryDb<NotionContact>(notion, notionDbId.contact)).filter((a) => !!a),
-      project: (await notionQueryDb<NotionProject>(notion, notionDbId.project)).filter((a) => !!a),
-      // document: (await notionQueryDb<NotionDocument>(notion, notionDbId.document)).filter((a) => !!a),
-      // stream: (await notionQueryDb<NotionStream>(notion, notionDbId.stream)).filter((a) => !!a),
-      media: (await notionQueryDb<NotionMedia>(notion, notionDbId.media)).filter((a) => !!a),
-    }
-    const results = await Promise.allSettled(Object.values(resources))
+    const config = useRuntimeConfig()
+    const rawDbId = config.private.notionDbId
+    const notionDbId = (typeof rawDbId === 'string' ? JSON.parse(rawDbId) : rawDbId) as unknown as NotionDB
+
+    const dbEntries = [
+      { type: 'organization', fn: () => notionQueryDb(notion, notionDbId.organization) },
+      // { type: 'user', fn: () => notionQueryDb(notion, notionDbId.user) },
+      { type: 'contact', fn: () => notionQueryDb(notion, notionDbId.contact) },
+      { type: 'project', fn: () => notionQueryDb(notion, notionDbId.project) },
+      // { type: 'document', fn: () => notionQueryDb(notion, notionDbId.document) },
+      // { type: 'stream', fn: () => notionQueryDb(notion, notionDbId.stream) },
+      { type: 'media', fn: () => notionQueryDb(notion, notionDbId.media) },
+    ] as const
+
+    const results = await Promise.allSettled(dbEntries.map(({ fn }) => throttledNotion(fn)))
 
     for (const [idx, res] of results.entries()) {
-      const type = Object.keys(resources)[idx] as keyof typeof resources
-      const resourceStorage = useStorage<Resource>(`data:resource:${type}`)
+      const { type } = dbEntries[idx]
+      const resourceStorage = useStorage(`data:resource:${type}`)
 
-      if (res.status === 'fulfilled')
+      if (res.status === 'fulfilled') {
+        const records = (res.value as any[]).filter(Boolean)
+
         await Promise.allSettled(
-          res.value.map(async (record) => {
-            if (typeof record === 'string') return
+          records.map(async (record) => {
+            if (typeof record === 'string' || !record?.id) return
 
-            const resource = (await resourceStorage.getItem(notionNormalizeId(record.id))) ?? {
+            const normalizedId = notionNormalizeId(record.id)
+            const resource = (await resourceStorage.getItem(normalizedId)) ?? {
               type,
               notificationStatus: false,
               record,
             }
 
             resource.record = record
-            resourceStorage.setItem(notionNormalizeId(record.id), resource)
+            await resourceStorage.setItem(normalizedId, resource)
           })
         )
-      else console.warn(`Notion fetch failed for ${type}:`, res.reason)
+      } else {
+        console.warn(`Notion fetch failed for ${type}:`, res.reason)
+      }
     }
 
-    return { result: 'success' }
+    const duration = ((Date.now() - startTime) / 1000).toFixed(2)
+    console.info(`[sync:resource] Completed synchronization in ${duration}s`)
+    return { result: 'success', duration: `${duration}s` }
   },
 })

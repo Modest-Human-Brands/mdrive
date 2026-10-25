@@ -1,0 +1,8 @@
+$kind: http-request
+url: '{{base_url}}/media/:kind/:args/:mediaId'
+method: GET
+pathVariables:
+  kind: image
+  args: f_auto&q_80
+  mediaId: photo-0054-0001-001
+order: 14000

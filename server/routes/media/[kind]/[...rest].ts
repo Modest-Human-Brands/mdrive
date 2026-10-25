@@ -165,7 +165,7 @@ export default defineEventHandler(async (event) => {
     console.log({ kind, rest })
 
     // 2. Construct your target CDN URL
-    const targetUrl = `https://cdn.redcatpictures.com/media/${kind}/${rest}`
+    const targetUrl = `${config.private.mediaRedirectUrl}/media/${kind}/${rest}`
 
     // 3. Redirect the client directly to the asset
     // 302 is the default for a temporary redirect, which is usually best for media URLs
