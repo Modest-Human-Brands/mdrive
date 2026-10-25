@@ -1,0 +1,23 @@
+$kind: http-request
+description: 'Bulk soft delete: archives the given Notion media pages (30-day retention). Destructive, so send it deliberately.'
+url: '{{base_url}}/api/media/action'
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "action": "delete",
+        "mediaIds": [
+            "304ee3b0-289a-817e-8f5a-ce45b13ffeaf"
+        ]
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () { pm.response.to.have.status(200); });
+      pm.test("Archived assets", function () {
+          pm.expect(pm.response.json().success).to.eql(true);
+          pm.expect(pm.response.json().updatedCount).to.be.above(0);
+      });
+    language: text/javascript
+order: 13100

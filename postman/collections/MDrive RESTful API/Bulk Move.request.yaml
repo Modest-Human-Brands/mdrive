@@ -1,0 +1,26 @@
+$kind: http-request
+description: 'Bulk move: re-assigns the given media page UUIDs to another project (targetProjectId is the Notion project page UUID).'
+url: '{{base_url}}/api/media/action'
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "action": "move",
+        "mediaIds": [
+            "304ee3b0-289a-817e-8f5a-ce45b13ffeaf"
+        ],
+        "params": {
+            "targetProjectId": "304ee3b0-289a-81f5-9261-c410967f5a36"
+        }
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () { pm.response.to.have.status(200); });
+      pm.test("Moved assets", function () {
+          pm.expect(pm.response.json().success).to.eql(true);
+          pm.expect(pm.response.json().updatedCount).to.be.above(0);
+      });
+    language: text/javascript
+order: 13200

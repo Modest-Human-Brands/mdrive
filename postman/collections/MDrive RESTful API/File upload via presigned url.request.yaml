@@ -1,5 +1,5 @@
 $kind: http-request
-description: Uploads a file to the first presigned URL returned by "Get signed url to upload media" (stored in the `uploadUrl` collection variable).
+description: 'Uploads a file to the first presigned URL returned by Get signed url to upload media (stored in the `uploadUrl` collection variable).'
 url: '{{uploadUrl}}'
 method: PUT
 auth:

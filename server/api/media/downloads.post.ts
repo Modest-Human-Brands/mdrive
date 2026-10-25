@@ -8,6 +8,20 @@ import notionTextStringify from '~/server/utils/notion-text-stringify'
 
 import r2GetPresignedDownloadUrl from '~/server/utils/r2-get-presigned-download-url'
 
+// First entry is the fallback when the stored filename's extension is not in the list
+const EXTENSIONS_BY_TYPE: Record<string, string[]> = {
+  photo: ['jpg', 'jpeg', 'png', 'webp', 'avif', 'heic', 'gif', 'tiff'],
+  video: ['mp4', 'mov', 'webm', 'mkv', 'avi', 'm4v'],
+  audio: ['mp3', 'wav', 'aac', 'm4a', 'flac', 'ogg'],
+}
+
+function resolveExtension(type: string | undefined, filename: string) {
+  const allowed = EXTENSIONS_BY_TYPE[type?.toLowerCase() ?? 'photo'] ?? EXTENSIONS_BY_TYPE.photo!
+  const ext = filename.split('.').at(-1)?.toLowerCase()
+
+  return ext && allowed.includes(ext) ? ext : allowed[0]!
+}
+
 const downloadSchema = z
   .object({
     projectId: z.string(),
@@ -62,8 +76,8 @@ export default defineEventHandler(async (event) => {
       targetMedia.map(async ({ id: mediaId, properties }) => {
         const filename = notionTextStringify(properties.Name?.title)
         const slug = properties.Slug.formula.string
-        // FIXME: get the mime type to extension
-        const objectKey = `processed/${orgId}/${projectKey}/${slug}.jpg`
+        const ext = resolveExtension(properties.Type?.select?.name, filename)
+        const objectKey = `processed/${orgId}/${projectKey}/${slug}.${ext}`
 
         const downloadUrl = await r2GetPresignedDownloadUrl(r2Drive, `${process.env.NITRO_PRIVATE_DRIVE_R2_ENDPOINT}/${process.env.NITRO_PRIVATE_DRIVE_R2_BUCKET}`, objectKey, expiresInSeconds)
 
