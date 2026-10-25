@@ -252,18 +252,18 @@ Lists paginated projects with associated client details, media asset counts, and
 Returns project metadata, watermark configuration, and an aggregated storage and approval breakdown matrix segmentized by media classification (`photo`, `video`, `audio`).
 
 - **Path Parameters:**
-  - `projectId` (`string`): Project identifier or slug (normalized automatically).
+  - `projectId` (`string`): Notion project page UUID (dashes optional).
 
 - **Request:**
 
   ```bash
-  curl -X GET "https://drive.example.com/api/projects/8-rajasthan-e-commerce-shoot"
+  curl -X GET "https://drive.example.com/api/projects/304ee3b0-289a-81f5-9261-c410967f5a36"
   ```
 
 - **Response `200 OK`:**
   ```json
   {
-    "id": "8-rajasthan-e-commerce-shoot",
+    "id": "304ee3b0-289a-81f5-9261-c410967f5a36",
     "orgId": "org_red-cat-pictures-1",
     "name": "Rajasthan E-Commerce Shoot",
     "status": "shoot",
@@ -286,9 +286,9 @@ Returns project metadata, watermark configuration, and an aggregated storage and
           "approval": {
             "total": 82,
             "plan": 0,
-            "draft": 70,
+            "pending": 70,
             "approved": 10,
-            "notApproved": 2,
+            "rejected": 2,
             "release": 0,
             "archive": 0
           }
@@ -300,9 +300,9 @@ Returns project metadata, watermark configuration, and an aggregated storage and
           "approval": {
             "total": 20,
             "plan": 0,
-            "draft": 16,
+            "pending": 16,
             "approved": 4,
-            "notApproved": 0,
+            "rejected": 0,
             "release": 0,
             "archive": 0
           }
@@ -314,9 +314,9 @@ Returns project metadata, watermark configuration, and an aggregated storage and
           "approval": {
             "total": 10,
             "plan": 0,
-            "draft": 9,
+            "pending": 9,
             "approved": 1,
-            "notApproved": 0,
+            "rejected": 0,
             "release": 0,
             "archive": 0
           }
@@ -330,21 +330,21 @@ Returns project metadata, watermark configuration, and an aggregated storage and
 
 #### `GET /api/projects/:projectId/media`
 
-Returns paginated media assets belonging to the given project, formatted for gallery and grid views with thumbnail URLs and technical metadata.
+Returns paginated media assets (`id` is the Notion media page UUID) belonging to the given project (`projectId` is the Notion project page UUID), formatted for gallery and grid views with thumbnail URLs and technical metadata.
 
 - **Query Parameters:**
 
-  | Parameter | Type                                                                         |    Default    | Description                          |
-  | :-------- | :--------------------------------------------------------------------------- | :-----------: | :----------------------------------- |
-  | `status`  | `'plan' \| 'draft' \| 'approved' \| 'notApproved' \| 'release' \| 'archive'` |    _None_     | Filters assets by approval status.   |
-  | `sort`    | `'date_desc' \| 'date_asc'`                                                  | `'date_desc'` | Sort order by creation timestamp.    |
-  | `page`    | `number`                                                                     |      `1`      | Page number (minimum `1`).           |
-  | `limit`   | `number`                                                                     |     `24`      | Items per page (range: `1` – `100`). |
+  | Parameter | Type                                                                        |    Default    | Description                          |
+  | :-------- | :-------------------------------------------------------------------------- | :-----------: | :----------------------------------- |
+  | `status`  | `'plan' \| 'pending' \| 'approved' \| 'rejected' \| 'release' \| 'archive'` |    _None_     | Filters assets by approval status.   |
+  | `sort`    | `'date_desc' \| 'date_asc'`                                                 | `'date_desc'` | Sort order by creation timestamp.    |
+  | `page`    | `number`                                                                    |      `1`      | Page number (minimum `1`).           |
+  | `limit`   | `number`                                                                    |     `24`      | Items per page (range: `1` – `100`). |
 
 - **Request:**
 
   ```bash
-  curl -X GET "https://drive.example.com/api/projects/8-rajasthan-e-commerce-shoot/media?status=approved&page=1&limit=24"
+  curl -X GET "https://drive.example.com/api/projects/304ee3b0-289a-81f5-9261-c410967f5a36/media?status=approved&page=1&limit=24"
   ```
 
 - **Response `200 OK`:**
@@ -352,7 +352,7 @@ Returns paginated media assets belonging to the given project, formatted for gal
   {
     "data": [
       {
-        "id": "photo-0003-0008-0001-001",
+        "id": "304ee3b0-289a-817e-8f5a-ce45b13ffeaf",
         "url": "https://media.example.com/media/image/s_810x1080/photo-0003-0008-0001-001",
         "filename": "Desert_Look_01.jpg",
         "status": "approved",
@@ -371,7 +371,7 @@ Returns paginated media assets belonging to the given project, formatted for gal
 
 #### `POST /api/projects/:projectId/publish`
 
-Marks a project review set as finalized in the database by updating the Notion project status to `Delivered`.
+Marks a project review set as finalized in the database by updating the Notion project status to `Delivered`. `projectId` is the Notion project page UUID.
 
 - **Request Body:**
 
@@ -382,7 +382,7 @@ Marks a project review set as finalized in the database by updating the Notion p
 - **Request:**
 
   ```bash
-  curl -X POST "https://drive.example.com/api/projects/8-rajasthan-e-commerce-shoot/publish" \
+  curl -X POST "https://drive.example.com/api/projects/304ee3b0-289a-81f5-9261-c410967f5a36/publish" \
     -H "Content-Type: application/json" \
     -d '{ "notify": true }'
   ```
@@ -400,14 +400,13 @@ Marks a project review set as finalized in the database by updating the Notion p
 
 #### `POST /api/media/uploads`
 
-Initializes an upload batch transaction. Automatically generates canonical asset identifiers adhering to `{prefix}-{orgIndex}-{projectIndex}-{mediaIndex}-{versionIndex}.{ext}` and issues direct-to-cloud pre-signed Cloudflare R2 upload URLs.
+Initializes an upload batch transaction. The organization slug is sent in the `x-org-id` header. Automatically generates canonical asset identifiers adhering to `{prefix}-{orgIndex}-{projectIndex}-{mediaIndex}-{versionIndex}.{ext}` and issues direct-to-cloud pre-signed Cloudflare R2 upload URLs.
 
 - **Request Body:**
 
   | Field               | Type     | Required | Description                                          |
   | :------------------ | :------- | :------: | :--------------------------------------------------- |
-  | `orgId`             | `string` | **Yes**  | Organization identifier or slug.                     |
-  | `projectId`         | `string` | **Yes**  | Target project identifier or slug.                   |
+  | `projectId`         | `string` | **Yes**  | Target Notion project page UUID.                     |
   | `files`             | `array`  | **Yes**  | Array of file declarations to upload.                |
   | `files[].filename`  | `string` | **Yes**  | Original filename with extension (e.g. `look1.jpg`). |
   | `files[].mimeType`  | `string` | **Yes**  | Valid MIME type (e.g. `image/jpeg`, `video/mp4`).    |
@@ -418,9 +417,9 @@ Initializes an upload batch transaction. Automatically generates canonical asset
   ```bash
   curl -X POST "https://drive.example.com/api/media/uploads" \
     -H "Content-Type: application/json" \
+    -H "x-org-id: red-cat-pictures-3" \
     -d '{
-      "orgId": "red-cat-pictures-3",
-      "projectId": "8-rajasthan-e-commerce-shoot",
+      "projectId": "304ee3b0-289a-81f5-9261-c410967f5a36",
       "files": [
         { "filename": "look1.jpg", "mimeType": "image/jpeg", "sizeBytes": 5242880 },
         { "filename": "b-roll.mp4", "mimeType": "video/mp4", "sizeBytes": 104857600 }
@@ -436,12 +435,12 @@ Initializes an upload batch transaction. Automatically generates canonical asset
       {
         "filename": "photo-0003-0008-0001-001.jpg",
         "uploadId": "up_9x8y7z6w",
-        "uploadUrl": "https://storage.r2.cloudflarestorage.com/media-vault/upload/red-cat-pictures-3/8-rajasthan-e-commerce-shoot/photo-0003-0008-0001-001.jpg?X-Amz-Signature=..."
+        "uploadUrl": "https://storage.r2.cloudflarestorage.com/media-vault/upload/red-cat-pictures-3/304ee3b08a1b81f59261c410967f5a36/photo-0003-0008-0001-001.jpg?X-Amz-Signature=..."
       },
       {
         "filename": "video-0003-0008-0002-001.mp4",
         "uploadId": "up_5v4u3t2s",
-        "uploadUrl": "https://storage.r2.cloudflarestorage.com/media-vault/upload/red-cat-pictures-3/8-rajasthan-e-commerce-shoot/video-0003-0008-0002-001.mp4?X-Amz-Signature=..."
+        "uploadUrl": "https://storage.r2.cloudflarestorage.com/media-vault/upload/red-cat-pictures-3/304ee3b08a1b81f59261c410967f5a36/video-0003-0008-0002-001.mp4?X-Amz-Signature=..."
       }
     ]
   }
@@ -451,7 +450,7 @@ Initializes an upload batch transaction. Automatically generates canonical asset
 
 #### `GET /api/media/uploads/:batchId`
 
-Retrieves status, progress percentage, error states, and generated Notion media IDs for all items in an ongoing upload batch.
+Retrieves status, progress percentage, error states, and generated Notion media IDs for all items in an ongoing upload batch. Returns `404` for an unknown batch.
 
 - **Path Parameters:**
   - `batchId` (`string`): Batch identifier returned by `POST /api/media/uploads`.
@@ -459,7 +458,7 @@ Retrieves status, progress percentage, error states, and generated Notion media 
 - **Response `200 OK`:**
   ```json
   {
-    "projectId": "8-rajasthan-e-commerce-shoot",
+    "projectId": "304ee3b0-289a-81f5-9261-c410967f5a36",
     "uploads": [
       {
         "uploadId": "up_9x8y7z6w",
@@ -513,7 +512,7 @@ Internal callback endpoint used by background transcoding and ingestion workers 
 
 #### `POST /api/media/action`
 
-Unified mutation command bus accepting a discriminated union on `action`. Dispatches atomic operations across multi-selected asset footprints.
+Unified mutation command bus accepting a discriminated union on `action`. `mediaIds` are Notion media page UUIDs. Dispatches atomic operations across multi-selected asset footprints.
 
 ---
 
@@ -526,7 +525,7 @@ Performs soft deletion by archiving target pages in Notion (retained for 30 days
   ```json
   {
     "action": "delete",
-    "mediaIds": ["med_0001", "med_0002"]
+    "mediaIds": ["304ee3b0-289a-817e-8f5a-ce45b13ffeaf", "304ee3b0-289a-81a4-b1c2-d3e4f5a6b7c8"]
   }
   ```
 
@@ -544,14 +543,14 @@ Performs soft deletion by archiving target pages in Notion (retained for 30 days
 
 #### Action: `approve`
 
-Updates approval state across selected media items.
+Updates approval state across selected media items (stored in the Notion `Status` as `Approved`, `Rejected` or `Pending`).
 
 - **Request Body:**
 
   ```json
   {
     "action": "approve",
-    "mediaIds": ["med_0001"],
+    "mediaIds": ["304ee3b0-289a-817e-8f5a-ce45b13ffeaf"],
     "params": {
       "status": "approved"
     }
@@ -569,7 +568,7 @@ Updates approval state across selected media items.
     "data": {
       "assets": [
         {
-          "mediaId": "med_0001",
+          "mediaId": "304ee3b0-289a-817e-8f5a-ce45b13ffeaf",
           "status": "approved",
           "updatedAt": "2026-10-16T06:30:00.000Z"
         }
@@ -589,9 +588,9 @@ Relocates assets to a target project by re-assigning project relation links in N
   ```json
   {
     "action": "move",
-    "mediaIds": ["med_0001", "med_0002"],
+    "mediaIds": ["304ee3b0-289a-817e-8f5a-ce45b13ffeaf", "304ee3b0-289a-81a4-b1c2-d3e4f5a6b7c8"],
     "params": {
-      "targetProjectId": "9-campaign-shoot-outdoor"
+      "targetProjectId": "304ee3b0-289a-81f5-9261-c410967f5a36"
     }
   }
   ```
@@ -612,26 +611,25 @@ Relocates assets to a target project by re-assigning project relation links in N
 
 #### `POST /api/media/downloads`
 
-Generates temporary, pre-signed download URLs for high-resolution assets stored in Cloudflare R2 (valid for 3,600 seconds). Supports explicit asset selections or project-wide status filters.
+Generates temporary, pre-signed download URLs for high-resolution assets stored in Cloudflare R2 (valid for 3,600 seconds). Supports explicit asset selections or project-wide status filters. The organization slug is sent in the `x-org-id` header.
 
 - **Request Body:**
 
-  | Field       | Type       | Required | Description                                                                                                           |
-  | :---------- | :--------- | :------: | :-------------------------------------------------------------------------------------------------------------------- |
-  | `orgId`     | `string`   | **Yes**  | Organization identifier.                                                                                              |
-  | `projectId` | `string`   | **Yes**  | Project identifier.                                                                                                   |
-  | `mediaIds`  | `string[]` |    No    | Specific array of media slug IDs.                                                                                     |
-  | `params`    | `object`   |    No    | Filter parameters: `{ "version": string, "status": "plan" \| "draft" \| "approved" \| "not approved" \| "release" }`. |
+  | Field       | Type       | Required | Description                                                                                                         |
+  | :---------- | :--------- | :------: | :------------------------------------------------------------------------------------------------------------------ |
+  | `projectId` | `string`   | **Yes**  | Notion project page UUID.                                                                                           |
+  | `mediaIds`  | `string[]` |    No    | Specific array of Notion media page UUIDs.                                                                          |
+  | `params`    | `object`   |    No    | Filter parameters: `{ "version": string, "status": "plan" \| "pending" \| "approved" \| "rejected" \| "release" }`. |
 
 - **Request:**
 
   ```bash
   curl -X POST "https://drive.example.com/api/media/downloads" \
     -H "Content-Type: application/json" \
+    -H "x-org-id: red-cat-pictures-3" \
     -d '{
-      "orgId": "red-cat-pictures-3",
-      "projectId": "8-rajasthan-e-commerce-shoot",
-      "mediaIds": ["photo-0003-0008-0001-001"],
+      "projectId": "304ee3b0-289a-81f5-9261-c410967f5a36",
+      "mediaIds": ["304ee3b0-289a-817e-8f5a-ce45b13ffeaf"],
       "params": {
         "status": "approved"
       }
@@ -645,9 +643,9 @@ Generates temporary, pre-signed download URLs for high-resolution assets stored 
     "expiresIn": 3600,
     "assets": [
       {
-        "mediaId": "c01826aa-3701-4475-8ec9-7f31cce1129b",
+        "mediaId": "304ee3b0-289a-817e-8f5a-ce45b13ffeaf",
         "filename": "Desert_Look_01.jpg",
-        "downloadUrl": "https://storage.r2.cloudflarestorage.com/media-vault/processed/red-cat-pictures-3/8-rajasthan-e-commerce-shoot/photo-0003-0008-0001-001.jpg?X-Amz-Signature=..."
+        "downloadUrl": "https://storage.r2.cloudflarestorage.com/media-vault/processed/red-cat-pictures-3/304ee3b08a1b81f59261c410967f5a36/photo-0003-0008-0001-001.jpg?X-Amz-Signature=..."
       }
     ]
   }
@@ -665,7 +663,7 @@ Appends a comment thread or pinned coordinate marker to one or more media assets
 
   | Field         | Type                               | Required | Description                                              |
   | :------------ | :--------------------------------- | :------: | :------------------------------------------------------- |
-  | `mediaIds`    | `string[]`                         | **Yes**  | Array of target media IDs (minimum 1).                   |
+  | `mediaIds`    | `string[]`                         | **Yes**  | Array of target Notion media page UUIDs (minimum 1).     |
   | `parentId`    | `string \| null`                   |    No    | Parent comment ID for nested thread replies.             |
   | `text`        | `string`                           | **Yes**  | Comment content.                                         |
   | `coordinates` | `{ x: number, y: number } \| null` |    No    | Pinned 2D canvas percentages (set to `null` on replies). |
@@ -677,7 +675,7 @@ Appends a comment thread or pinned coordinate marker to one or more media assets
   curl -X POST "https://drive.example.com/api/media/comments" \
     -H "Content-Type: application/json" \
     -d '{
-      "mediaIds": ["photo-0003-0008-0001-001"],
+      "mediaIds": ["304ee3b0-289a-817e-8f5a-ce45b13ffeaf"],
       "parentId": null,
       "text": "Warm up the highlight values in the top-right corner.",
       "coordinates": { "x": 82.5, "y": 14.2 },
@@ -691,7 +689,7 @@ Appends a comment thread or pinned coordinate marker to one or more media assets
     "comments": [
       {
         "commentId": "cmt_9f8e7d6c",
-        "mediaId": "photo-0003-0008-0001-001",
+        "mediaId": "304ee3b0-289a-817e-8f5a-ce45b13ffeaf",
         "parentId": null,
         "text": "Warm up the highlight values in the top-right corner.",
         "coordinates": { "x": 82.5, "y": 14.2 },
@@ -712,7 +710,7 @@ Retrieves organized discussion trees for given media IDs, automatically assembli
 
   ```json
   {
-    "mediaIds": ["photo-0003-0008-0001-001"]
+    "mediaIds": ["304ee3b0-289a-817e-8f5a-ce45b13ffeaf"]
   }
   ```
 
@@ -720,7 +718,7 @@ Retrieves organized discussion trees for given media IDs, automatically assembli
   ```json
   {
     "timelines": {
-      "photo-0003-0008-0001-001": [
+      "304ee3b0-289a-817e-8f5a-ce45b13ffeaf": [
         {
           "commentId": "cmt_9f8e7d6c",
           "parentId": null,
@@ -750,7 +748,7 @@ Retrieves organized discussion trees for given media IDs, automatically assembli
 
 #### `GET /media/:kind/**`
 
-Dynamic edge routing handler supporting format negotiation and on-the-fly transformations.
+Currently redirects (`302`) to `${NITRO_PRIVATE_MEDIA_REDIRECT_URL}/media/:kind/**`. The in-process transformation pipeline below is disabled behind this redirect.
 
 - **Path Format:** `/media/:kind/:modifiers/:mediaId`
   - `:kind`: `'image' | 'video' | 'audio'`

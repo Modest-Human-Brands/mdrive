@@ -5,11 +5,12 @@ description: |-
   A successful PUT request typically returns a `200 OK`, `201 Created`, or `204 No Content` response code.
 url: '{{base_url}}/api/media/downloads'
 method: POST
+headers:
+  x-org-id: '{{org_id}}'
 body:
   type: json
   content: |-
     {
-        "orgId": "{{org_id}}",
         "projectId": "304ee3b0-289a-81f5-9261-c410967f5a36"
     }
 scripts:

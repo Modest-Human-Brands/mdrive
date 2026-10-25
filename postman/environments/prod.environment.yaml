@@ -6,7 +6,7 @@ values:
     type: default
     description: MDrive API base URL
   - key: org_id
-    value: ''
+    value: 'red-cat-pictures-3'
     enabled: true
     type: default
-    description: Notion page UUID of the organization
+    description: Organization slug sent as the x-org-id header

@@ -10,7 +10,6 @@ import r2GetPresignedDownloadUrl from '~/server/utils/r2-get-presigned-download-
 
 const downloadSchema = z
   .object({
-    orgId: z.string(),
     projectId: z.string(),
     mediaIds: z.array(z.string()).optional(),
     params: z
@@ -26,13 +25,17 @@ const downloadSchema = z
 
 export default defineEventHandler(async (event) => {
   try {
-    const { orgId, projectId, mediaIds, params } = await readValidatedBody(event, (data) => downloadSchema.parse(data))
+    const { projectId, mediaIds, params } = await readValidatedBody(event, (data) => downloadSchema.parse(data))
+
+    const orgId = event.req.headers.get('x-org-id')
+    if (!orgId) {
+      throw new HTTPError({ statusCode: 400, statusMessage: 'Missing x-org-id header' })
+    }
 
     const mediaStorage = useStorage<Resource<'media'>>(`data:resource:media`)
     const mediaKeys = await mediaStorage.getKeys()
     const allMedia = (await mediaStorage.getItems(mediaKeys)).flatMap(({ value }) => value?.record || [])
 
-    const orgKey = notionNormalizeId(orgId)
     const projectKey = notionNormalizeId(projectId)
 
     let targetMedia: NotionMedia[] = []
@@ -60,7 +63,7 @@ export default defineEventHandler(async (event) => {
         const filename = notionTextStringify(properties.Name?.title)
         const slug = properties.Slug.formula.string
         // FIXME: get the mime type to extension
-        const objectKey = `processed/${orgKey}/${projectKey}/${slug}.jpg`
+        const objectKey = `processed/${orgId}/${projectKey}/${slug}.jpg`
 
         const downloadUrl = await r2GetPresignedDownloadUrl(r2Drive, `${process.env.NITRO_PRIVATE_DRIVE_R2_ENDPOINT}/${process.env.NITRO_PRIVATE_DRIVE_R2_BUCKET}`, objectKey, expiresInSeconds)
 

@@ -8,11 +8,15 @@ import notionNormalizeId from '~/server/utils/notion-normalize-id'
 import r2Drive from '~/server/utils/r2-drive'
 import r2GetPresignedUploadUrl from '~/server/utils/r2-get-presigned-upload-url'
 
-const uploadSchema = z.object({ orgId: z.string(), projectId: z.string(), files: z.array(z.object({ filename: z.string(), mimeType: z.string(), sizeBytes: z.number() })) })
+const uploadSchema = z.object({ projectId: z.string(), files: z.array(z.object({ filename: z.string(), mimeType: z.string(), sizeBytes: z.number() })) })
 
 export default defineEventHandler(async (event) => {
   try {
-    const { orgId, projectId, files } = await readValidatedBody(event, uploadSchema)
+    const { projectId, files } = await readValidatedBody(event, uploadSchema)
+    const orgId = event.req.headers.get('x-org-id')
+    if (!orgId) {
+      throw new HTTPError({ statusCode: 400, statusMessage: 'Missing x-org-id header' })
+    }
 
     const batchId = `batch_${randomUUID().slice(0, 8)}`
     const uploadMetaStorage = useStorage('data:upload')
@@ -23,9 +27,8 @@ export default defineEventHandler(async (event) => {
     // 1. Resolve Organization Index
     const orgKeys = await orgStorage.getKeys()
     const orgs = (await orgStorage.getItems(orgKeys)).flatMap(({ value }) => value?.record || [])
-    const orgKey = notionNormalizeId(orgId)
     const projectKey = notionNormalizeId(projectId)
-    const org = orgs.find((o) => notionNormalizeId(o.id) === orgKey)
+    const org = orgs.find((o) => o.properties?.Id?.rich_text?.[0]?.text?.content === orgId)
     const orgIndexStr = String(org?.properties?.Index?.number || 0).padStart(4, '0')
 
     // 2. Resolve Project Index
@@ -60,7 +63,7 @@ export default defineEventHandler(async (event) => {
       const generatedName = `${prefix}-${orgIndexStr}-${projectIndexStr}-${mediaIndexStr}-${versionIndexStr}`
       const newFilename = `${generatedName}${ext}`
 
-      const objectKey = `upload/${orgKey}/${projectKey}/${generatedName}${ext}`
+      const objectKey = `upload/${orgId}/${projectKey}/${generatedName}${ext}`
 
       const uploadUrl = await r2GetPresignedUploadUrl(r2Drive, `${process.env.NITRO_PRIVATE_DRIVE_R2_ENDPOINT}/${process.env.NITRO_PRIVATE_DRIVE_R2_BUCKET}`, objectKey, file.mimeType)
 
