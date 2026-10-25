@@ -1,5 +1,26 @@
 # Changelog
 
+## v0.10.0
+
+[compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.9.1...v0.10.0)
+
+### 🚀 Enhancements
+
+- ⚠️ Integrate nitro-mcp-toolkit and add health tool ([2dfb309](https://github.com/Modest-Human-Brands/mdrive/commit/2dfb309))
+- Update sync tasks, media redirection, Postman collections, and deps ([31cfbb2](https://github.com/Modest-Human-Brands/mdrive/commit/31cfbb2))
+- Update media request payloads and normalize IDs; adjust project and media statuses ([09b1d17](https://github.com/Modest-Human-Brands/mdrive/commit/09b1d17))
+- Update postman collections to use notion uuid; add x-org-id header for uploads and downloads ([060dfff](https://github.com/Modest-Human-Brands/mdrive/commit/060dfff))
+- Implement API key validation middleware and update Postman collections for x-api-key usage ([bd6d9f8](https://github.com/Modest-Human-Brands/mdrive/commit/bd6d9f8))
+- Enhance Postman collections with new bulk actions and update existing request descriptions ([b53f1d0](https://github.com/Modest-Human-Brands/mdrive/commit/b53f1d0))
+
+#### ⚠️ Breaking Changes
+
+- ⚠️ Integrate nitro-mcp-toolkit and add health tool ([2dfb309](https://github.com/Modest-Human-Brands/mdrive/commit/2dfb309))
+
+### ❤️ Contributors
+
+- Shirsendu Bairagi ([@shba007](https://github.com/shba007))
+
 ## v0.9.1
 
 [compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.9.0...v0.9.1)
