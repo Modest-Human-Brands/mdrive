@@ -4,7 +4,7 @@ import { defineTask } from 'nitro/task'
 import pThrottle from 'p-throttle'
 import pRetry, { AbortError } from 'p-retry'
 
-import type { NotionDB } from '~/server/types'
+import type { NotionDB, Resource } from '~/server/types'
 import notion from '~/server/utils/notion'
 import notionNormalizeId from '~/server/utils/notion-normalize-id'
 import notionQueryDb from '~/server/utils/notion-query-db'
@@ -14,7 +14,7 @@ const throttle = pThrottle({
   interval: 1000,
 })
 
-const throttledNotion = throttle((task: () => Promise) =>
+const throttledNotion = throttle((task: () => Promise<unknown>) =>
   pRetry(task, {
     retries: 3,
     onFailedAttempt: (error: any) => {
@@ -22,7 +22,7 @@ const throttledNotion = throttle((task: () => Promise) =>
       if (!isRateLimited) throw new AbortError(error)
     },
   })
-) as (task: () => Promise) => Promise
+) as (task: () => Promise<unknown>) => Promise<unknown>
 
 export default defineTask({
   meta: {
@@ -51,7 +51,7 @@ export default defineTask({
 
     for (const [idx, res] of results.entries()) {
       const { type } = dbEntries[idx]
-      const resourceStorage = useStorage(`data:resource:${type}`)
+      const resourceStorage = useStorage<Resource>(`data:resource:${type}`)
 
       if (res.status === 'fulfilled') {
         const records = (res.value as any[]).filter(Boolean)

@@ -17,13 +17,10 @@ const r2CdnClientSingleton = () => {
   })
 }
 
-// eslint-disable-next-line no-shadow-restricted-names
-declare const globalThis: {
-  r2CdnGlobal: ReturnType<typeof r2CdnClientSingleton>
-} & typeof globalThis
+const globalForR2 = globalThis as unknown as { r2CdnGlobal?: ReturnType<typeof r2CdnClientSingleton> }
 
-const r2Cdn = globalThis.r2CdnGlobal ?? r2CdnClientSingleton()
+const r2Cdn = globalForR2.r2CdnGlobal ?? r2CdnClientSingleton()
 
 export default r2Cdn
 
-if (process.env.NODE_ENV !== 'production') globalThis.r2CdnGlobal = r2Cdn
+if (process.env.NODE_ENV !== 'production') globalForR2.r2CdnGlobal = r2Cdn

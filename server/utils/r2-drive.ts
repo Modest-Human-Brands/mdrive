@@ -17,13 +17,10 @@ const r2DriveClientSingleton = () => {
   })
 }
 
-// eslint-disable-next-line no-shadow-restricted-names
-declare const globalThis: {
-  r2DriveGlobal: ReturnType<typeof r2DriveClientSingleton>
-} & typeof globalThis
+const globalForR2 = globalThis as unknown as { r2DriveGlobal?: ReturnType<typeof r2DriveClientSingleton> }
 
-const r2Drive = globalThis.r2DriveGlobal ?? r2DriveClientSingleton()
+const r2Drive = globalForR2.r2DriveGlobal ?? r2DriveClientSingleton()
 
 export default r2Drive
 
-if (process.env.NODE_ENV !== 'production') globalThis.r2DriveGlobal = r2Drive
+if (process.env.NODE_ENV !== 'production') globalForR2.r2DriveGlobal = r2Drive

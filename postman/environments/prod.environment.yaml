@@ -5,3 +5,8 @@ values:
     enabled: true
     type: default
     description: MDrive API base URL
+  - key: org_id
+    value: ''
+    enabled: true
+    type: default
+    description: Notion page UUID of the organization

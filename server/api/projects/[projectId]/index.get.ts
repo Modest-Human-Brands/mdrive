@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
     const allMedia = (await mediaStorage.getItems(mediaKeys)).flatMap(({ value }) => value?.record || [])
     const projectMedia = allMedia.filter(({ properties }) => properties['Project Slug']?.rollup?.array[0]?.formula?.string === project.record.properties.Slug.formula.string)
 
-    const baseApproval = () => ({ total: 0, plan: 0, draft: 0, approved: 0, notApproved: 0, release: 0, archive: 0 })
+    const baseApproval = () => ({ total: 0, plan: 0, pending: 0, approved: 0, rejected: 0, release: 0, archive: 0 })
 
     const stats = {
       totals: { count: 0, storageBytes: 0, humanReadableStorage: '0 Bytes' },
@@ -35,7 +35,7 @@ export default defineEventHandler(async (event) => {
     for (const media of projectMedia) {
       const rawType = media.properties.Type?.select?.name?.toLowerCase() || 'photo'
       const type = (['photo', 'video', 'audio'].includes(rawType) ? rawType : 'photo') as 'photo' | 'video' | 'audio'
-      const status = media.properties.Status?.status?.name?.toLowerCase() || 'draft'
+      const status = media.properties.Status?.status?.name?.toLowerCase() || 'pending'
 
       const sizeBytes = media.properties.Size?.number || 5_000_000
 
@@ -54,8 +54,8 @@ export default defineEventHandler(async (event) => {
 
           break
         }
-        case 'draft': {
-          category.approval.draft += 1
+        case 'pending': {
+          category.approval.pending += 1
 
           break
         }
@@ -64,10 +64,8 @@ export default defineEventHandler(async (event) => {
 
           break
         }
-        case 'not approved':
-        case 'notapproved':
         case 'rejected': {
-          category.approval.notApproved += 1
+          category.approval.rejected += 1
 
           break
         }
@@ -82,8 +80,8 @@ export default defineEventHandler(async (event) => {
           break
         }
         default: {
-          // Fallback for any unknown, legacy 'pending', or blank statuses
-          category.approval.draft += 1
+          // Fallback for any unknown or blank statuses
+          category.approval.pending += 1
         }
       }
     }
@@ -94,7 +92,7 @@ export default defineEventHandler(async (event) => {
     stats.breakdown.audio.humanReadableStorage = formatBytes(stats.breakdown.audio.storageBytes)
 
     return {
-      id: projectId,
+      id: project.record.id,
       orgId: 'org_red-cat-pictures-1',
       name: project.record.properties.Name?.title?.[0]?.plain_text || 'Untitled Project',
       status: project.record.properties.Status?.status?.name?.toLowerCase() || 'active',

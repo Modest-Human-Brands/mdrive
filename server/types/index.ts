@@ -16,6 +16,9 @@ export type Device = (typeof devices)[number]
 export const resolutions = ['1440p', '1080p', '720p'] as const
 export type Resolution = (typeof resolutions)[number]
 
+export type Category = string
+export type AspectRatio = '16:9' | '3:2' | '4:3' | '1:1' | '3:4' | '2:3' | '9:16'
+
 export const resourceTypes = ['organization', 'project', 'media', 'contact'] as const
 
 export type ResourceType = (typeof resourceTypes)[number]
@@ -282,6 +285,15 @@ export interface NotionProject {
   cover: NotionImage
   icon: NotionImage
   properties: {
+    Client: {
+      type: 'relation'
+      relation: { id: string }[]
+      has_more: false
+    }
+    Watermark: {
+      type: 'checkbox'
+      checkbox: boolean
+    }
     Index: {
       type: 'number'
       number: number
@@ -347,6 +359,10 @@ export interface NotionMedia {
   cover: NotionImage
   icon: NotionImage
   properties: {
+    Size: {
+      type: 'number'
+      number: number
+    }
     'Project Index': {
       type: 'rollup'
       rollup: {
@@ -392,7 +408,7 @@ export interface NotionMedia {
     Status: {
       type: 'status'
       status: {
-        name: 'Plan' | 'Draft' | 'Release' | 'Archive'
+        name: 'Plan' | 'Pending' | 'Approved' | 'Rejected' | 'Release' | 'Archive'
       }
     }
     Project: {

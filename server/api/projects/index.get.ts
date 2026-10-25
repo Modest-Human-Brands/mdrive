@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
 
     const mediaStorage = useStorage<Resource<'media'>>(`data:resource:media`)
     const projectStorage = useStorage<Resource<'project'>>(`data:resource:project`)
-    const clientStorage = useStorage<Resource<'client'>>(`data:resource:client`)
+    const clientStorage = useStorage<Resource<'contact'>>(`data:resource:contact`)
 
     const [mediaKeys, projectKeys, clientKeys] = await Promise.all([mediaStorage.getKeys(), projectStorage.getKeys(), clientStorage.getKeys()])
 

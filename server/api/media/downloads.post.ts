@@ -2,6 +2,7 @@ import { defineEventHandler, readValidatedBody, HTTPError } from 'nitro/h3'
 import { useStorage } from 'nitro/storage'
 import { z } from 'zod'
 import type { NotionMedia, Resource } from '~/server/types'
+import notionNormalizeId from '~/server/utils/notion-normalize-id'
 import r2Drive from '~/server/utils/r2-drive'
 import notionTextStringify from '~/server/utils/notion-text-stringify'
 
@@ -15,7 +16,7 @@ const downloadSchema = z
     params: z
       .object({
         version: z.string().optional(),
-        status: z.enum(['plan', 'draft', 'approved', 'not approved', 'release']).optional(),
+        status: z.enum(['plan', 'pending', 'approved', 'rejected', 'release']).optional(),
       })
       .default({}),
   })
@@ -31,13 +32,17 @@ export default defineEventHandler(async (event) => {
     const mediaKeys = await mediaStorage.getKeys()
     const allMedia = (await mediaStorage.getItems(mediaKeys)).flatMap(({ value }) => value?.record || [])
 
+    const orgKey = notionNormalizeId(orgId)
+    const projectKey = notionNormalizeId(projectId)
+
     let targetMedia: NotionMedia[] = []
 
     if (mediaIds && mediaIds.length > 0) {
-      targetMedia = allMedia.filter(({ properties }) => mediaIds.includes(properties.Slug.formula.string))
+      const mediaKeys = new Set(mediaIds.map((id) => notionNormalizeId(id)))
+      targetMedia = allMedia.filter(({ id }) => mediaKeys.has(notionNormalizeId(id)))
     } else if (projectId) {
       targetMedia = allMedia.filter(({ properties }) => {
-        const matchesProject = properties['Project Slug'].rollup.array[0]?.formula?.string === projectId
+        const matchesProject = properties.Project?.relation?.some((r) => notionNormalizeId(r.id) === projectKey)
         const matchesStatus = params.status ? properties.Status.status.name.toLowerCase() === params.status.toLowerCase() : true
 
         return matchesProject && matchesStatus
@@ -55,7 +60,7 @@ export default defineEventHandler(async (event) => {
         const filename = notionTextStringify(properties.Name?.title)
         const slug = properties.Slug.formula.string
         // FIXME: get the mime type to extension
-        const objectKey = `processed/${orgId}/${projectId}/${slug}.jpg`
+        const objectKey = `processed/${orgKey}/${projectKey}/${slug}.jpg`
 
         const downloadUrl = await r2GetPresignedDownloadUrl(r2Drive, `${process.env.NITRO_PRIVATE_DRIVE_R2_ENDPOINT}/${process.env.NITRO_PRIVATE_DRIVE_R2_BUCKET}`, objectKey, expiresInSeconds)
 

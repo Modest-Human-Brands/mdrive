@@ -27,11 +27,11 @@ export default defineEventHandler(async (event) => {
 
     return batchData
   } catch (error: any) {
-    console.error('API /media/uploads/[batchId] POST Error:', error)
+    console.error('API /media/uploads/[batchId] GET Error:', error)
 
     throw new HTTPError({
-      statusCode: 500,
-      statusMessage: 'Some Unknown Error Found',
+      statusCode: error.status || error.statusCode || 500,
+      statusMessage: error.statusMessage || 'Some Unknown Error Found',
     })
   }
 })

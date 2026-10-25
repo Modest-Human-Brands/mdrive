@@ -4,6 +4,7 @@ import { randomUUID } from 'uncrypto'
 import z from 'zod'
 import type { Resource } from '~/server/types'
 
+import notionNormalizeId from '~/server/utils/notion-normalize-id'
 import r2Drive from '~/server/utils/r2-drive'
 import r2GetPresignedUploadUrl from '~/server/utils/r2-get-presigned-upload-url'
 
@@ -22,13 +23,15 @@ export default defineEventHandler(async (event) => {
     // 1. Resolve Organization Index
     const orgKeys = await orgStorage.getKeys()
     const orgs = (await orgStorage.getItems(orgKeys)).flatMap(({ value }) => value?.record || [])
-    const org = orgs.find((o) => o.id === orgId || o.properties?.Id?.rich_text?.[0]?.text?.content === orgId)
+    const orgKey = notionNormalizeId(orgId)
+    const projectKey = notionNormalizeId(projectId)
+    const org = orgs.find((o) => notionNormalizeId(o.id) === orgKey)
     const orgIndexStr = String(org?.properties?.Index?.number || 0).padStart(4, '0')
 
     // 2. Resolve Project Index
     const projectKeys = await projectStorage.getKeys()
     const projects = (await projectStorage.getItems(projectKeys)).flatMap(({ value }) => value?.record || [])
-    const project = projects.find((p) => p.id === projectId || p.properties?.Slug?.formula?.string === projectId)
+    const project = projects.find((p) => notionNormalizeId(p.id) === projectKey)
     const projectIndexStr = String(project?.properties?.Index?.number || 0).padStart(4, '0')
 
     // 3. Resolve base Media count for this project
@@ -36,7 +39,7 @@ export default defineEventHandler(async (event) => {
     const allMedia = (await mediaStorage.getItems(mediaKeys)).flatMap(({ value }) => value?.record || [])
 
     // Safely check if the media belongs to the target project
-    const projectMedia = allMedia.filter((m) => m.properties?.Project?.relation?.some((r) => r.id === project?.id) || m.properties?.['Project Slug']?.rollup?.array?.[0]?.formula?.string === projectId)
+    const projectMedia = allMedia.filter((m) => m.properties?.Project?.relation?.some((r) => notionNormalizeId(r.id) === projectKey))
 
     let currentMediaCount = projectMedia.length
 
@@ -57,7 +60,7 @@ export default defineEventHandler(async (event) => {
       const generatedName = `${prefix}-${orgIndexStr}-${projectIndexStr}-${mediaIndexStr}-${versionIndexStr}`
       const newFilename = `${generatedName}${ext}`
 
-      const objectKey = `upload/${orgId}/${projectId}/${generatedName}${ext}`
+      const objectKey = `upload/${orgKey}/${projectKey}/${generatedName}${ext}`
 
       const uploadUrl = await r2GetPresignedUploadUrl(r2Drive, `${process.env.NITRO_PRIVATE_DRIVE_R2_ENDPOINT}/${process.env.NITRO_PRIVATE_DRIVE_R2_BUCKET}`, objectKey, file.mimeType)
 

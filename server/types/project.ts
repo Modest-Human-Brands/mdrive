@@ -1,4 +1,11 @@
-import type { ProjectClient, ProjectStatus } from './index'
+import type { NotionProject } from './index'
+
+export type ProjectStatus = NotionProject['properties']['Status']['status']['name']
+
+export type ProjectClient = {
+  name: string
+  avatar?: string
+}
 
 export type MediaType = 'photo' | 'video'
 

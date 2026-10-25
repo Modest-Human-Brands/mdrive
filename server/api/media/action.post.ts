@@ -2,6 +2,7 @@ import { defineEventHandler, readValidatedBody, HTTPError } from 'nitro/h3'
 import { z } from 'zod'
 import { useStorage } from 'nitro/storage'
 import notion from '~/server/utils/notion'
+import notionNormalizeId from '~/server/utils/notion-normalize-id'
 import type { Resource } from '~/server/types'
 
 const actionSchema = z.discriminatedUnion('action', [
@@ -92,13 +93,13 @@ export default defineEventHandler(async (event) => {
 
         const projectKeys = await projectStorage.getKeys()
         const projects = (await projectStorage.getItems(projectKeys)).flatMap(({ value }) => value?.record || [])
-        const targetProjectExists = projects.some((p) => p.id === targetProjectId || p.properties.Slug?.formula?.string === targetProjectId)
+        const targetProject = projects.find((p) => notionNormalizeId(p.id) === notionNormalizeId(targetProjectId))
 
-        if (!targetProjectExists) {
+        if (!targetProject) {
           throw new HTTPError({ statusCode: 404, statusMessage: 'Target project not found' })
         }
 
-        const targetNotionId = projects.find((p) => p.properties.Slug?.formula?.string === targetProjectId)?.id || targetProjectId
+        const targetNotionId = targetProject.id
 
         await Promise.all(
           body.mediaIds.map((id) =>

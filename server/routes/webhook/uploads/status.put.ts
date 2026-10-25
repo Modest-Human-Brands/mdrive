@@ -54,7 +54,7 @@ export default defineEventHandler(async (event) => {
         Index: { number: mediaIndex },
         'Version Index': { number: versiontIndex },
         Type: { select: { name: data.metadata.kind === 'video' ? 'Video' : 'Photo' } },
-        Status: { status: { name: status === 'completed' ? 'Draft' : 'Plan' } },
+        Status: { status: { name: status === 'completed' ? 'Pending' : 'Plan' } },
       }
 
       if (targetProject) notionProperties.Project = { relation: [{ id: targetProject.id }] }

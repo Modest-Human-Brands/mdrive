@@ -7,7 +7,7 @@ import notionNormalizeId from '~/server/utils/notion-normalize-id'
 import notionTextStringify from '~/server/utils/notion-text-stringify'
 
 const querySchema = z.object({
-  status: z.enum(['plan', 'draft', 'approved', 'notApproved', 'release', 'archive']).optional(),
+  status: z.enum(['plan', 'pending', 'approved', 'rejected', 'release', 'archive']).optional(),
   sort: z.enum(['date_desc', 'date_asc']).default('date_desc'),
   page: z.coerce.number().min(1).default(1),
   limit: z.coerce.number().min(1).max(100).default(24),
@@ -15,9 +15,9 @@ const querySchema = z.object({
 
 const statusMap = {
   plan: 'Plan',
-  draft: 'Draft',
+  pending: 'Pending',
   approved: 'Approved',
-  notApproved: 'Not Approved',
+  rejected: 'Rejected',
   release: 'Release',
   archive: 'Archive',
 }
@@ -52,10 +52,13 @@ export default defineEventHandler(async (event) => {
 
     const totalItems = projectMedia.length
 
+    const direction = sort === 'date_asc' ? 1 : -1
+    projectMedia.sort((a, b) => direction * (new Date(a.created_time).getTime() - new Date(b.created_time).getTime()))
+
     const paginatedMedia = projectMedia.slice(offset, offset + limit)
 
     const formattedData = paginatedMedia.map(({ properties, cover, id }) => ({
-      id: properties.Slug.formula.string,
+      id,
       url: `${config.public.mediaUrl}/media/image/s_810x1080/${properties.Slug.formula.string}`, //cover?.type === 'external' ? cover.external.url : undefined,
       filename: notionTextStringify(properties.Name.title),
       status: properties.Status?.status?.name?.toLowerCase() || 'pending',

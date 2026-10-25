@@ -9,8 +9,8 @@ body:
   type: json
   content: |-
     {
-        "orgId": "red-cat-pictures-3",
-        "projectId": "rajasthan-ecommerce-shoot-8"
+        "orgId": "{{org_id}}",
+        "projectId": "304ee3b0-289a-81f5-9261-c410967f5a36"
     }
 scripts:
   - type: afterResponse
