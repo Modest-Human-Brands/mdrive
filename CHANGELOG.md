@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.10.1
+
+[compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.10.0...v0.10.1)
+
+### 🚀 Enhancements
+
+- Update environment variables and refactor R2 client configurations for improved consistency ([f5809dc](https://github.com/Modest-Human-Brands/mdrive/commit/f5809dc))
+
+### ❤️ Contributors
+
+- Shirsendu Bairagi ([@shba007](https://github.com/shba007))
+
 ## v0.10.0
 
 [compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.9.1...v0.10.0)
