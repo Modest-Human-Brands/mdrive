@@ -40,7 +40,7 @@
     "nitro": "^3.0.260903-beta",
     "nitro-mcp-toolkit": "^0.4.0",
     "ohash": "^2.0.12",
-    "p-retry": "^8.0.1",
+    "p-retry": "^9.0.0",
     "p-throttle": "^8.1.1",
     "undio": "^0.2.0",
     "unstorage": "^1.17.6",
