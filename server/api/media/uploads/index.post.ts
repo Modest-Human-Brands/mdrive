@@ -65,7 +65,9 @@ export default defineEventHandler(async (event) => {
 
       const objectKey = `upload/${orgId}/${projectKey}/${generatedName}${ext}`
 
-      const uploadUrl = await r2GetPresignedUploadUrl(r2Drive, `${process.env.NITRO_PRIVATE_DRIVE_R2_ENDPOINT}/${process.env.NITRO_PRIVATE_DRIVE_R2_BUCKET}`, objectKey, file.mimeType)
+      const driveEndpoint = process.env.NITRO_MDRIVE_PRIVATE_DRIVE_R2_ENDPOINT
+      const driveBucket = process.env.NITRO_MDRIVE_PRIVATE_DRIVE_R2_BUCKET
+      const uploadUrl = await r2GetPresignedUploadUrl(r2Drive, `${driveEndpoint}/${driveBucket}`, objectKey, file.mimeType)
 
       uploadsResponse.push({
         filename: newFilename,

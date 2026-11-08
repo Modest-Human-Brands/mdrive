@@ -79,7 +79,9 @@ export default defineEventHandler(async (event) => {
         const ext = resolveExtension(properties.Type?.select?.name, filename)
         const objectKey = `processed/${orgId}/${projectKey}/${slug}.${ext}`
 
-        const downloadUrl = await r2GetPresignedDownloadUrl(r2Drive, `${process.env.NITRO_PRIVATE_DRIVE_R2_ENDPOINT}/${process.env.NITRO_PRIVATE_DRIVE_R2_BUCKET}`, objectKey, expiresInSeconds)
+        const driveEndpoint = process.env.NITRO_MDRIVE_PRIVATE_DRIVE_R2_ENDPOINT
+        const driveBucket = process.env.NITRO_MDRIVE_PRIVATE_DRIVE_R2_BUCKET
+        const downloadUrl = await r2GetPresignedDownloadUrl(r2Drive, `${driveEndpoint}/${driveBucket}`, objectKey, expiresInSeconds)
 
         return {
           mediaId,
