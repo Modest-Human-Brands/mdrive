@@ -1,8 +1,8 @@
 import { defineEventHandler, getRouterParam, getValidatedQuery, HTTPError } from 'nitro/h3'
-import { useRuntimeConfig } from 'nitro/runtime-config'
 import { useStorage } from 'nitro/storage'
 import { z } from 'zod'
 import type { Resource } from '~/server/types'
+import mediaUrl from '~/server/utils/media-url'
 import mediaMeta from '~/server/utils/media-meta'
 import notionNormalizeId from '~/server/utils/notion-normalize-id'
 import notionTextStringify from '~/server/utils/notion-text-stringify'
@@ -30,8 +30,6 @@ export default defineEventHandler(async (event) => {
     const query = await getValidatedQuery(event, (data) => querySchema.parse(data))
     const { status, sort, page, limit } = query
     const offset = (page - 1) * limit
-
-    const config = useRuntimeConfig()
 
     const mediaStorage = useStorage<Resource<'media'>>(`data:resource:media`)
     const projectStorage = useStorage<Resource<'project'>>(`data:resource:project`)
@@ -63,7 +61,7 @@ export default defineEventHandler(async (event) => {
 
       return {
         id,
-        url: `${config.public.mediaUrl}/media/image/s_810x1080/${properties.Slug.formula.string}`, //cover?.type === 'external' ? cover.external.url : undefined,
+        url: mediaUrl(properties.Slug.formula.string), //cover?.type === 'external' ? cover.external.url : undefined,
         filename: notionTextStringify(properties.Name.title),
         status: properties.Status?.status?.name?.toLowerCase() || 'pending',
         type: properties.Type?.select?.name?.toLowerCase() || 'photo',

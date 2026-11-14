@@ -4,11 +4,13 @@ import { useRuntimeConfig } from 'nitro/runtime-config'
 import { useStorage } from 'nitro/storage'
 import { z } from 'zod'
 import type { NotionDB, Resource } from '~/server/types'
+import findMediaPage from '~/server/utils/find-media-page'
 import notion from '~/server/utils/notion'
+import notionNormalizeId from '~/server/utils/notion-normalize-id'
 
 export default defineEventHandler(async (event) => {
   try {
-    const { batchId, uploadId, filename, status, progressPercent, mediaId, error, data } = await readValidatedBody(
+    const { batchId, uploadId, filename, status, progressPercent, error, data } = await readValidatedBody(
       event,
       z.object({
         batchId: z.string().optional(),
@@ -16,7 +18,9 @@ export default defineEventHandler(async (event) => {
         filename: z.string(),
         status: z.enum(['pending', 'processing', 'completed', 'failed']),
         progressPercent: z.number(),
-        mediaId: z.string().nullable(),
+        // Accepted for compatibility but never trusted: the page id is resolved here.
+        mediaId: z.string().nullable().optional(),
+        projectId: z.string().optional(),
         error: z.string().nullable(),
         data: z
           .object({
@@ -29,13 +33,25 @@ export default defineEventHandler(async (event) => {
 
     const uploadMetaStorage = useStorage('data:upload')
     const config = useRuntimeConfig()
-    const notionDbId = JSON.parse(config.private.notionDbId) as unknown as NotionDB
+    const rawDbId = config.private.notionDbId
+    const notionDbId = (typeof rawDbId === 'string' ? JSON.parse(rawDbId) : rawDbId) as unknown as NotionDB
 
-    const parts = filename.split('.')[0]?.split('-') || []
+    const nameKey = filename.replace(/\.[^.]+$/, '')
+    const parts = nameKey.split('-')
     const orgIndex = Number.parseInt(parts[1], 10)
     const projectIndex = Number.parseInt(parts[2], 10)
     const mediaIndex = Number.parseInt(parts[3], 10)
     const versiontIndex = Number.parseInt(parts[4], 10)
+
+    if ([orgIndex, projectIndex, mediaIndex, versiontIndex].some((n) => Number.isNaN(n))) {
+      throw new HTTPError({ statusCode: 400, statusMessage: 'Filename must look like <kind>-<org>-<project>-<media>-<version>' })
+    }
+
+    // Which upload does this callback belong to? Callbacks may omit the batch.
+    const batchRef = batchId && uploadId ? { batchId, uploadId } : await useStorage<{ batchId: string; uploadId: string }>('data:upload-file').getItem(nameKey)
+    if (!batchRef) {
+      throw new HTTPError({ statusCode: 404, statusMessage: 'Unknown upload filename' })
+    }
 
     const orgStorage = useStorage<Resource<'organization'>>('data:resource:organization')
     const projectStorage = useStorage<Resource<'project'>>('data:resource:project')
@@ -43,10 +59,23 @@ export default defineEventHandler(async (event) => {
     const orgs = (await orgStorage.getItems(await orgStorage.getKeys())).flatMap(({ value }) => value?.record || [])
     const projects = (await projectStorage.getItems(await projectStorage.getKeys())).flatMap(({ value }) => value?.record || [])
 
-    const targetOrg = Number.isNaN(orgIndex) ? null : orgs.find((o) => o.properties?.Index?.number === orgIndex)
-    const targetProject = Number.isNaN(projectIndex) ? null : projects.find((p) => p.properties?.Index?.number === projectIndex)
+    const targetOrg = orgs.find((o) => o.properties?.Index?.number === orgIndex)
 
-    let finalMediaId = mediaId
+    type UploadRow = { uploadId: string; filename: string; status: string; progressPercent: number; mediaId: string | null; error: string | null }
+    type BatchData = { projectId: string; uploads: UploadRow[] }
+
+    const batchData = await uploadMetaStorage.getItem<BatchData>(batchRef.batchId)
+    const uploadRow = batchData?.uploads?.find((u) => u.uploadId === batchRef.uploadId)
+
+    // Prefer the project the batch was created for; fall back to the index in the name.
+    const batchProjectKey = batchData?.projectId ? notionNormalizeId(batchData.projectId) : null
+    const targetProject = (batchProjectKey && projects.find((p) => notionNormalizeId(p.id) === batchProjectKey)) || projects.find((p) => p.properties?.Index?.number === projectIndex) || null
+
+    // The page id is ours: reuse what an earlier callback stored, else look the page up by indexes.
+    let finalMediaId: string | null = uploadRow?.mediaId ?? null
+    if (!finalMediaId && targetProject) {
+      finalMediaId = await findMediaPage(targetProject.id, notionDbId.media, mediaIndex, versiontIndex)
+    }
 
     if (data?.metadata) {
       const notionProperties: any = {
@@ -120,35 +149,10 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    if (batchId && uploadId) {
-      const batchData = await uploadMetaStorage.getItem<{
-        projectId: string
-        uploads: {
-          uploadId: string
-          filename: string
-          status: string
-          progressPercent: number
-          mediaId: string | null
-          error: string | null
-        }[]
-      }>(batchId)
+    if (batchData && Array.isArray(batchData.uploads)) {
+      batchData.uploads = batchData.uploads.map((upload) => (upload.uploadId === batchRef.uploadId ? { ...upload, status, progressPercent, mediaId: finalMediaId ?? upload.mediaId, error } : upload))
 
-      if (batchData && Array.isArray(batchData.uploads)) {
-        batchData.uploads = batchData.uploads.map((upload) => {
-          if (upload.uploadId === uploadId) {
-            return {
-              ...upload,
-              status,
-              progressPercent,
-              mediaId: finalMediaId,
-              error,
-            }
-          }
-          return upload
-        })
-
-        await uploadMetaStorage.setItem(batchId, batchData)
-      }
+      await uploadMetaStorage.setItem(batchRef.batchId, batchData)
     }
 
     return { success: true }

@@ -2,7 +2,6 @@ import { defineEventHandler, getValidatedRouterParams, H3Event, HTTPError, redir
 import { defineCachedFunction } from 'nitro/cache'
 import { useRuntimeConfig } from 'nitro/runtime-config'
 import { useStorage } from 'nitro/storage'
-import { $fetch } from 'ofetch'
 
 import z from 'zod'
 import { consola } from 'consola'
@@ -20,6 +19,7 @@ import r2Drive from '~/server/utils/r2-drive'
 import r2GetAllFiles from '~/server/utils/r2-get-all-files'
 import r2GetFileStream from '~/server/utils/r2-get-file-stream'
 import { generateMpd } from '~/server/utils/generate-mpd'
+import mmediaTransform from '~/server/utils/mmedia-transform'
 import r2Cdn from '~/server/utils/r2-cdn'
 
 function normalizeArgs(rawArgs: string) {
@@ -244,17 +244,9 @@ export default defineEventHandler(async (event) => {
       //   byteLength: number
       // }>('transform:image', { payload: { cacheKey, mediaOriginId, modifiers } })
 
-      const data = await $fetch<{
-        streamPath: string
-        contentType: string
-        byteLength: number
-      }>('/media/transform', {
-        baseURL: config.public.mediaUrl,
-        method: 'POST',
-        body: {
-          taskType: 'transform:image',
-          payload: { cacheKey, mediaOriginId, modifiers },
-        },
+      const data = await mmediaTransform({
+        taskType: 'transform:image',
+        payload: { cacheKey, mediaOriginId, modifiers },
       })
 
       if (!data?.streamPath) {
@@ -460,17 +452,9 @@ export default defineEventHandler(async (event) => {
 
           consola.warn('⚠️ Video Cache MISS', { cacheKey })
 
-          const data = await $fetch<{
-            streamPath: string
-            contentType: string
-            byteLength: number
-          }>('/media', {
-            baseURL: config.public.mediaUrl,
-            method: 'POST',
-            body: {
-              taskType: 'transform:video',
-              payload: { cacheKey, mediaId: mediaId.split('_')[0], mediaOriginId, modifiers },
-            },
+          const data = await mmediaTransform({
+            taskType: 'transform:video',
+            payload: { cacheKey, mediaId: mediaId.split('_')[0], mediaOriginId, modifiers },
           })
 
           if (!data?.streamPath) {

@@ -47,6 +47,8 @@ export default defineConfig({
     },
     private: {
       notionDbId: process.env.NOTION_DB_ID || '',
+      mmediaUrl: process.env.NITRO_MDRIVE_PRIVATE_MMEDIA_URL || '',
+      mmediaApiKey: process.env.NITRO_MDRIVE_PRIVATE_MMEDIA_API_KEY || '',
       mconnectUrl: process.env.NITRO_MDRIVE_PRIVATE_MCONNECT_URL || '',
       mediaRedirectUrl: process.env.NITRO_MDRIVE_PRIVATE_MEDIA_REDIRECT_URL || '',
       serverValidationKey: process.env.NITRO_MDRIVE_PRIVATE_SERVER_VALIDATION_KEY || '',

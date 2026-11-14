@@ -1,8 +1,8 @@
 import { defineEventHandler, getRouterParam, HTTPError } from 'nitro/h3'
-import { useRuntimeConfig } from 'nitro/runtime-config'
 import { useStorage } from 'nitro/storage'
 
 import type { Resource } from '~/server/types'
+import mediaUrl from '~/server/utils/media-url'
 import mediaMeta from '~/server/utils/media-meta'
 import notionNormalizeId from '~/server/utils/notion-normalize-id'
 import notionTextStringify from '~/server/utils/notion-text-stringify'
@@ -19,11 +19,10 @@ export default defineEventHandler(async (event) => {
     }
 
     const { properties } = media
-    const config = useRuntimeConfig()
 
     return {
       id: media.id,
-      url: `${config.public.mediaUrl}/media/image/s_810x1080/${properties.Slug.formula.string}`,
+      url: mediaUrl(properties.Slug.formula.string),
       filename: notionTextStringify(properties.Name.title),
       status: properties.Status?.status?.name?.toLowerCase() || 'pending',
       type: properties.Type?.select?.name?.toLowerCase() || 'photo',

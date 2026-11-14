@@ -85,6 +85,10 @@ export default defineEventHandler(async (event) => {
       })
     }
 
+    // Reverse index so the webhook can find a batch from the filename alone.
+    const uploadFileStorage = useStorage('data:upload-file')
+    await Promise.all(initialStatusList.map(({ uploadId, filename }) => uploadFileStorage.setItem(filename.replace(/\.[^.]+$/, ''), { batchId, uploadId })))
+
     await uploadMetaStorage.setItem(batchId, {
       projectId,
       uploads: initialStatusList,
