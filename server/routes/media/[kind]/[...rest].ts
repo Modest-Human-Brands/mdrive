@@ -9,7 +9,6 @@ import * as mime from 'mime-types'
 import { hash } from 'ohash'
 
 import { createReadStream } from 'node:fs'
-import { Readable } from 'node:stream'
 
 import { CODEC_MAP } from '~/server/types'
 
@@ -20,6 +19,7 @@ import r2GetAllFiles from '~/server/utils/r2-get-all-files'
 import r2GetFileStream from '~/server/utils/r2-get-file-stream'
 import { generateMpd } from '~/server/utils/generate-mpd'
 import mmediaTransform from '~/server/utils/mmedia-transform'
+import openTransformResult from '~/server/utils/open-transform-result'
 import r2Cdn from '~/server/utils/r2-cdn'
 
 function normalizeArgs(rawArgs: string) {
@@ -249,23 +249,8 @@ export default defineEventHandler(async (event) => {
         payload: { cacheKey, mediaOriginId, modifiers },
       })
 
-      if (!data?.streamPath) {
-        throw new HTTPError({ statusCode: 500, statusMessage: 'No stream generated' })
-      }
-
-      const stream = Readable.toWeb(createReadStream(data.streamPath))
-      const [_storageStream, responseStream] = stream.tee()
-
-      // Cache to Storage (fire-and-forget; errors are logged)
-      /*  r2PutFileStream(r2Cdn, cacheKey, storageStream as ReadableStream, data.byteLength)
-         .then(() => {
-           consola.info('💾 Image Saved to R2 cache', { cacheKey, bytes: data.byteLength })
-         })
-         .catch((error) => {
-           consola.error('Failed to save to cache', error)
-         }) */
-
-      return responseStream
+      // MMedia writes the result to the CDN bucket; MDrive only reads it.
+      return await openTransformResult(data)
     } // Pipeline of audio
     else if (kind === 'audio') {
       // const cacheKey = buildCacheKey({ kind, source: mediaId, args:JSON.stringify(modifiers), ext: 'mp3' })
@@ -457,7 +442,7 @@ export default defineEventHandler(async (event) => {
             payload: { cacheKey, mediaId: mediaId.split('_')[0], mediaOriginId, modifiers },
           })
 
-          if (!data?.streamPath) {
+          if (!data?.streamPath && !data?.key) {
             throw new HTTPError({ statusCode: 500, statusMessage: 'No stream generated' })
           }
         }

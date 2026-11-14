@@ -2,8 +2,10 @@ import { HTTPError } from 'nitro/h3'
 import { useRuntimeConfig } from 'nitro/runtime-config'
 import { $fetch } from 'ofetch'
 
+/** `streamPath` is set when MMedia shares a volume with MDrive; `key` is the object in the CDN bucket. */
 export type TransformResult = {
-  streamPath: string
+  streamPath?: string
+  key?: string
   contentType: string
   byteLength: number
 }

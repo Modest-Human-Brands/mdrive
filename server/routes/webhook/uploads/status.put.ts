@@ -8,6 +8,16 @@ import findMediaPage from '~/server/utils/find-media-page'
 import notion from '~/server/utils/notion'
 import notionNormalizeId from '~/server/utils/notion-normalize-id'
 
+/** Turns 1.5, "1.5" or "3:2" into a width/height number, or null. */
+function parseAspectRatio(value: unknown): number | null {
+  if (typeof value === 'number') return value > 0 ? value : null
+  if (typeof value !== 'string') return null
+
+  const [w, h] = value.split(':').map(Number)
+  if (h === undefined) return w > 0 ? w : null
+  return w > 0 && h > 0 ? w / h : null
+}
+
 export default defineEventHandler(async (event) => {
   try {
     const { batchId, uploadId, filename, status, progressPercent, error, data } = await readValidatedBody(
@@ -89,10 +99,15 @@ export default defineEventHandler(async (event) => {
       if (targetProject) notionProperties.Project = { relation: [{ id: targetProject.id }] }
       if (targetOrg) notionProperties.Organization = { relation: [{ id: targetOrg.id }] }
 
-      if (data.metadata.format) {
-        const { width, height } = data.metadata.format
+      const format = data.metadata.format ?? {}
+      const width = Number(format.width)
+      const height = Number(format.height)
+      const hasSize = width > 0 && height > 0
 
-        const ratio = width / height
+      // Width and height win; otherwise use the processor's aspectRatio (number or "w:h").
+      const ratio = hasSize ? width / height : parseAspectRatio(format.aspectRatio)
+
+      if (ratio) {
         const standardRatios = [
           { name: '16:9', val: 16 / 9 },
           { name: '3:2', val: 3 / 2 },
@@ -105,7 +120,10 @@ export default defineEventHandler(async (event) => {
 
         const closestRatio = standardRatios.reduce((prev, curr) => (Math.abs(curr.val - ratio) < Math.abs(prev.val - ratio) ? curr : prev))
         notionProperties['Aspect ratio'] = { select: { name: closestRatio.name } }
+      }
 
+      // Without real dimensions there is no honest resolution, so leave it unset.
+      if (hasSize) {
         const shortSide = Math.min(width, height)
         const standardResolutions = [
           { name: '4320p', val: 4320 },
@@ -131,9 +149,12 @@ export default defineEventHandler(async (event) => {
         notionProperties['Uploaded By'] = { rich_text: [{ text: { content: meta.uploadedBy.trim().slice(0, 200) } }] }
       }
 
-      if (meta.exif && typeof meta.exif === 'object') {
-        const { camera, lens, shutter, iso, colorProfile, location } = meta.exif
-        const exifJson = JSON.stringify({ camera, lens, shutter, iso, colorProfile, location })
+      // MMedia sends `exif`; older senders put the same keys at the top level.
+      const exifSource = meta.exif && typeof meta.exif === 'object' ? meta.exif : meta
+      const { camera, lens, shutter, iso, colorProfile, location } = exifSource
+      const exif = { camera, lens, shutter, iso, colorProfile, location }
+      if (Object.values(exif).some((v) => v !== undefined && v !== null && v !== '')) {
+        const exifJson = JSON.stringify(exif)
         // A Notion text chunk holds 2000 characters; the fixed keys stay well under that.
         if (exifJson.length <= 2000) notionProperties.EXIF = { rich_text: [{ text: { content: exifJson } }] }
       }
