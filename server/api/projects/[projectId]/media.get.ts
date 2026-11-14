@@ -3,6 +3,7 @@ import { useRuntimeConfig } from 'nitro/runtime-config'
 import { useStorage } from 'nitro/storage'
 import { z } from 'zod'
 import type { Resource } from '~/server/types'
+import mediaMeta from '~/server/utils/media-meta'
 import notionNormalizeId from '~/server/utils/notion-normalize-id'
 import notionTextStringify from '~/server/utils/notion-text-stringify'
 
@@ -57,17 +58,22 @@ export default defineEventHandler(async (event) => {
 
     const paginatedMedia = projectMedia.slice(offset, offset + limit)
 
-    const formattedData = paginatedMedia.map(({ properties, cover, id }) => ({
-      id,
-      url: `${config.public.mediaUrl}/media/image/s_810x1080/${properties.Slug.formula.string}`, //cover?.type === 'external' ? cover.external.url : undefined,
-      filename: notionTextStringify(properties.Name.title),
-      status: properties.Status?.status?.name?.toLowerCase() || 'pending',
-      type: properties.Type?.select?.name?.toLowerCase() || 'photo',
-      metadata: {
-        resolution: properties.Resolution?.select?.name,
-        aspectRatio: properties['Aspect ratio']?.select?.name,
-      },
-    }))
+    const formattedData = paginatedMedia.map(({ properties, cover, id, created_time }) => {
+      const { exif: _exif, ...meta } = mediaMeta(properties, created_time)
+
+      return {
+        id,
+        url: `${config.public.mediaUrl}/media/image/s_810x1080/${properties.Slug.formula.string}`, //cover?.type === 'external' ? cover.external.url : undefined,
+        filename: notionTextStringify(properties.Name.title),
+        status: properties.Status?.status?.name?.toLowerCase() || 'pending',
+        type: properties.Type?.select?.name?.toLowerCase() || 'photo',
+        metadata: {
+          resolution: properties.Resolution?.select?.name,
+          aspectRatio: properties['Aspect ratio']?.select?.name,
+        },
+        ...meta,
+      }
+    })
 
     return {
       data: formattedData,

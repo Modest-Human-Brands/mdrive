@@ -90,6 +90,25 @@ export default defineEventHandler(async (event) => {
         notionProperties.Resolution = { select: { name: closestRes.name } }
       }
 
+      // File facts and EXIF come from the media processor; each is optional.
+      const meta = data.metadata
+      const sizeBytes = Number(meta.sizeBytes ?? meta.format?.size)
+      if (Number.isFinite(sizeBytes) && sizeBytes > 0) notionProperties.Size = { number: sizeBytes }
+
+      const durationSec = Number(meta.durationSec ?? meta.format?.duration)
+      if (Number.isFinite(durationSec) && durationSec > 0) notionProperties.Duration = { number: durationSec }
+
+      if (typeof meta.uploadedBy === 'string' && meta.uploadedBy.trim()) {
+        notionProperties['Uploaded By'] = { rich_text: [{ text: { content: meta.uploadedBy.trim().slice(0, 200) } }] }
+      }
+
+      if (meta.exif && typeof meta.exif === 'object') {
+        const { camera, lens, shutter, iso, colorProfile, location } = meta.exif
+        const exifJson = JSON.stringify({ camera, lens, shutter, iso, colorProfile, location })
+        // A Notion text chunk holds 2000 characters; the fixed keys stay well under that.
+        if (exifJson.length <= 2000) notionProperties.EXIF = { rich_text: [{ text: { content: exifJson } }] }
+      }
+
       if (finalMediaId) {
         await notion.pages.update({ page_id: finalMediaId, properties: notionProperties })
       } else {

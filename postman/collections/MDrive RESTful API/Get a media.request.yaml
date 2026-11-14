@@ -1,0 +1,18 @@
+$kind: http-request
+description: 'One media item with file facts (createdAt, version, sizeBytes, durationSec, uploadedBy) and an exif block, null when unknown. mediaId is the Notion media page UUID.'
+url: '{{base_url}}/api/media/:mediaId'
+method: GET
+pathVariables:
+  mediaId: 024ee3b0-289a-82fb-bcd0-01f8024c64e1
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () { pm.response.to.have.status(200); });
+      pm.test("Has file facts", function () {
+        const j = pm.response.json();
+        pm.expect(j).to.have.property("createdAt");
+        pm.expect(j).to.have.property("version");
+        pm.expect(j).to.have.property("exif");
+      });
+    language: text/javascript
+order: 9200
