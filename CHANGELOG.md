@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.10.2
+
+[compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.10.1...v0.10.2)
+
+### 🚀 Enhancements
+
+- Add review submission endpoint and update TODO list with new tasks ([87ecc4e](https://github.com/Modest-Human-Brands/mdrive/commit/87ecc4e))
+- **media:** Add file facts to media list and media detail endpoint ([5733726](https://github.com/Modest-Human-Brands/mdrive/commit/5733726))
+- Update media handling with new API integrations and environment variables ([dba480e](https://github.com/Modest-Human-Brands/mdrive/commit/dba480e))
+- Refactor media handling to utilize openTransformResult and improve error handling ([97233e7](https://github.com/Modest-Human-Brands/mdrive/commit/97233e7))
+- Update Dockerfile and README for environment variable adjustments and health check config ([ee5abe2](https://github.com/Modest-Human-Brands/mdrive/commit/ee5abe2))
+
+### ❤️ Contributors
+
+- Shirsendu Bairagi ([@shba007](https://github.com/shba007))
+
 ## v0.10.1
 
 [compare changes](https://github.com/Modest-Human-Brands/mdrive/compare/v0.10.0...v0.10.1)
