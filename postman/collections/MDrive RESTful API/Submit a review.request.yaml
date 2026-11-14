@@ -1,0 +1,27 @@
+$kind: http-request
+description: 'Records the client review note and time on the project. Returns 409 while any file is still pending. projectId is the Notion project page UUID. Needs Review Note (text) and Reviewed At (date) properties on the Projects database.'
+url: '{{base_url}}/api/projects/:projectId/review'
+method: POST
+headers:
+  Content-Type: application/json
+pathVariables:
+  projectId: 304ee3b0-289a-81f5-9261-c410967f5a36
+body:
+  type: json
+  content: |-
+    {
+      "note": "Great set, two to redo"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 200 or 409 (pending files)", function () { pm.expect(pm.response.code).to.be.oneOf([200, 409]); });
+      if (pm.response.code === 200) {
+        pm.test("Returns summary and time", function () {
+          const j = pm.response.json();
+          pm.expect(j.summary).to.have.property("pending", 0);
+          pm.expect(j.submittedAt).to.be.a("string");
+        });
+      }
+    language: text/javascript
+order: 9100
