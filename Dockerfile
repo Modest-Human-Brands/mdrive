@@ -5,6 +5,8 @@ WORKDIR /app
 COPY package.json bun.lock ./
 COPY nitro.config.ts ./
 
+ARG SITE_URL
+
 ENV NITRO_PRESET=bun
 ENV NITRO_PUBLIC_SITE_URL=$SITE_URL
 
@@ -27,6 +29,11 @@ ENV NODE_ENV=production
 ENV NITRO_APP_VERSION=$VERSION
 ENV NITRO_APP_BUILD_TIME=$BUILD_TIME
 
-EXPOSE 3000
+ENV PORT=3004
+
+EXPOSE 3004
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD wget -qO- http://localhost:3004/api/health || exit 1
 
 ENTRYPOINT ["bun", ".output/server/index.mjs"]

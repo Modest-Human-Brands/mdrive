@@ -109,35 +109,37 @@ docker pull ghcr.io/modest-human-brands/mdrive:latest
 
 Configuration is managed via environment variables defined in `.env`:
 
-| Variable                                   | Type          | Required | Description                                                                                           |
-| :----------------------------------------- | :------------ | :------: | :---------------------------------------------------------------------------------------------------- |
-| `NODE_ENV`                                 | `string`      |    No    | Runtime environment (`development` or `production`). Default: `development`.                          |
-| `NOTION_API_KEY`                           | `string`      | **Yes**  | Notion integration secret key for querying and updating records.                                      |
-| `NITRO_PRIVATE_NOTION_DB_ID`               | `JSON string` | **Yes**  | JSON mapping of database IDs: `{"organization":"...","project":"...","media":"...","contact":"..."}`. |
-| `NITRO_PUBLIC_SITE_URL`                    | `string`      |    No    | Base public URL of the application.                                                                   |
-| `NITRO_SESSION_PASSWORD`                   | `string`      |    No    | Encryption secret for Nitro session handling.                                                         |
-| `NITRO_PRIVATE_SERVER_VALIDATION_KEY`      | `string`      | **Yes**  | Shared API key. Clients send it in the `x-api-key` header.                                            |
-| `NITRO_PRIVATE_MEDIA_REDIRECT_URL`         | `string`      | **Yes**  | Base URL that `GET /media/:kind/**` redirects (302) to, e.g. `https://cdn.example.com`.               |
-| `NITRO_PRIVATE_STEGANOGRAPHY_KEY`          | `string`      |    No    | Encryption key for invisible image watermarking.                                                      |
-| `NITRO_PRIVATE_DRIVE_R2_ENDPOINT`          | `string`      | **Yes**  | S3 API endpoint for Cloudflare R2 primary storage.                                                    |
-| `NITRO_PRIVATE_DRIVE_R2_BUCKET`            | `string`      | **Yes**  | Cloudflare R2 bucket name for media storage.                                                          |
-| `NITRO_PRIVATE_DRIVE_R2_ACCESS_KEY_ID`     | `string`      | **Yes**  | R2 access key ID with read/write permissions.                                                         |
-| `NITRO_PRIVATE_DRIVE_R2_SECRET_ACCESS_KEY` | `string`      | **Yes**  | R2 secret access key.                                                                                 |
-| `NITRO_PRIVATE_DRIVE_R2_REGION`            | `string`      |    No    | R2 bucket region (default: `auto`).                                                                   |
-| `NITRO_PRIVATE_DRIVE_R2_PUBLIC_URL`        | `string`      |    No    | Public CDN or vanity domain URL for direct media access.                                              |
-| `NITRO_PRIVATE_CDN_R2_ENDPOINT`            | `string`      |    No    | S3 API endpoint for secondary CDN edge cache bucket.                                                  |
-| `NITRO_PRIVATE_CDN_R2_BUCKET`              | `string`      |    No    | S3 bucket name for CDN cache assets.                                                                  |
-| `NITRO_PRIVATE_CDN_R2_ACCESS_KEY_ID`       | `string`      |    No    | Access key ID for CDN bucket.                                                                         |
-| `NITRO_PRIVATE_CDN_R2_SECRET_ACCESS_KEY`   | `string`      |    No    | Secret access key for CDN bucket.                                                                     |
-| `NITRO_PRIVATE_CDN_R2_REGION`              | `string`      |    No    | Region for CDN bucket.                                                                                |
-| `NITRO_PRIVATE_CDN_R2_PUBLIC_URL`          | `string`      |    No    | Public URL for CDN cache distribution.                                                                |
-| `CONCURRENCY_LIMIT`                        | `number`      |    No    | Limit for concurrent batch operations.                                                                |
+| Variable                                          | Type          | Required | Description                                                                                                |
+| :------------------------------------------------ | :------------ | :------: | :--------------------------------------------------------------------------------------------------------- |
+| `NODE_ENV`                                        | `string`      |    No    | Runtime environment (`development` or `production`). Default: `development`.                               |
+| `NOTION_API_KEY`                                  | `string`      | **Yes**  | Notion integration secret key for querying and updating records.                                           |
+| `NOTION_DB_ID`                                    | `JSON string` | **Yes**  | JSON mapping of database IDs: `{"organization":"...","project":"...","media":"...","contact":"..."}`.      |
+| `NITRO_PUBLIC_SITE_URL`                           | `string`      |    No    | Base public URL of the application.                                                                        |
+| `NITRO_SESSION_PASSWORD`                          | `string`      |    No    | Encryption secret for Nitro session handling.                                                              |
+| `NITRO_MDRIVE_PUBLIC_MEDIA_URL`                   | `string`      |    No    | Origin that serves `/media/**` (MDrive or the CDN in front of it). Empty gives relative `/media/...` URLs. |
+| `NITRO_MDRIVE_PRIVATE_MMEDIA_URL`                 | `string`      | **Yes**  | Base URL of the MMedia transform service.                                                                  |
+| `NITRO_MDRIVE_PRIVATE_MMEDIA_API_KEY`             | `string`      | **Yes**  | Shared key sent to MMedia as `x-api-key`.                                                                  |
+| `NOTION_API_BASE_URL`                             | `string`      |    No    | Notion API origin override (test stub only).                                                               |
+| `NITRO_MDRIVE_PRIVATE_SERVER_VALIDATION_KEY`      | `string`      | **Yes**  | Shared API key. Clients send it in the `x-api-key` header.                                                 |
+| `NITRO_MDRIVE_PRIVATE_MEDIA_REDIRECT_URL`         | `string`      | **Yes**  | Base URL that `GET /media/:kind/**` redirects (302) to, e.g. `https://cdn.example.com`.                    |
+| `NITRO_MDRIVE_PRIVATE_STEGANOGRAPHY_KEY`          | `string`      |    No    | Encryption key for invisible image watermarking.                                                           |
+| `NITRO_MDRIVE_PRIVATE_DRIVE_R2_ENDPOINT`          | `string`      | **Yes**  | S3 API endpoint for Cloudflare R2 primary storage.                                                         |
+| `NITRO_MDRIVE_PRIVATE_DRIVE_R2_BUCKET`            | `string`      | **Yes**  | Cloudflare R2 bucket name for media storage.                                                               |
+| `NITRO_MDRIVE_PRIVATE_DRIVE_R2_ACCESS_KEY_ID`     | `string`      | **Yes**  | R2 access key ID with read/write permissions.                                                              |
+| `NITRO_MDRIVE_PRIVATE_DRIVE_R2_SECRET_ACCESS_KEY` | `string`      | **Yes**  | R2 secret access key.                                                                                      |
+| `NITRO_MDRIVE_PRIVATE_DRIVE_R2_REGION`            | `string`      |    No    | R2 bucket region (default: `auto`).                                                                        |
+| `NITRO_MDRIVE_PRIVATE_CDN_R2_ENDPOINT`            | `string`      |    No    | S3 API endpoint for secondary CDN edge cache bucket.                                                       |
+| `NITRO_MDRIVE_PRIVATE_CDN_R2_BUCKET`              | `string`      |    No    | S3 bucket name for CDN cache assets.                                                                       |
+| `NITRO_MDRIVE_PRIVATE_CDN_R2_ACCESS_KEY_ID`       | `string`      |    No    | Access key ID for CDN bucket.                                                                              |
+| `NITRO_MDRIVE_PRIVATE_CDN_R2_SECRET_ACCESS_KEY`   | `string`      |    No    | Secret access key for CDN bucket.                                                                          |
+| `NITRO_MDRIVE_PRIVATE_CDN_R2_REGION`              | `string`      |    No    | Region for CDN bucket.                                                                                     |
+| `CONCURRENCY_LIMIT`                               | `number`      |    No    | Limit for concurrent batch operations.                                                                     |
 
 ---
 
 ## API Specifications
 
-All `/api/**` and `/webhook/**` endpoints (except `GET /api/health`) require an `x-api-key` header matching `NITRO_PRIVATE_SERVER_VALIDATION_KEY`: missing key returns `401`, wrong key `403`, and an unset server key `500`. `/media/**` is public.
+All `/api/**` and `/webhook/**` endpoints (except `GET /api/health`) require an `x-api-key` header matching `NITRO_MDRIVE_PRIVATE_SERVER_VALIDATION_KEY`: missing key returns `401`, wrong key `403`, and an unset server key `500`. `/media/**` is public.
 
 All endpoints return JSON responses unless streaming media content. Route parameters and request bodies are strictly validated with [Zod](https://zod.dev).
 
@@ -750,7 +752,7 @@ Retrieves organized discussion trees for given media IDs, automatically assembli
 
 #### `GET /media/:kind/**`
 
-Currently redirects (`302`) to `${NITRO_PRIVATE_MEDIA_REDIRECT_URL}/media/:kind/**`. The in-process transformation pipeline below is disabled behind this redirect.
+Currently redirects (`302`) to `${NITRO_MDRIVE_PRIVATE_MEDIA_REDIRECT_URL}/media/:kind/**`. The in-process transformation pipeline below is disabled behind this redirect.
 
 - **Path Format:** `/media/:kind/:modifiers/:mediaId`
   - `:kind`: `'image' | 'video' | 'audio'`
