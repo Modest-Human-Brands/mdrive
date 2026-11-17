@@ -45,6 +45,8 @@ export default defineTask({
       // { type: 'document', fn: () => notionQueryDb(notion, notionDbId.document) },
       // { type: 'stream', fn: () => notionQueryDb(notion, notionDbId.stream) },
       { type: 'media', fn: () => notionQueryDb(notion, notionDbId.media) },
+      // Who may act for which organization. Skipped (fail closed) when the id is not configured.
+      ...(notionDbId.member ? [{ type: 'member', fn: () => notionQueryDb(notion, notionDbId.member) } as const] : []),
     ] as const
 
     const results = await Promise.allSettled(dbEntries.map(({ fn }) => throttledNotion(fn)))
@@ -71,6 +73,14 @@ export default defineTask({
             await resourceStorage.setItem(normalizedId, resource)
           })
         )
+
+        // Memberships are access control: a row removed in Notion must stop granting access.
+        // Only prune on a non-empty result, because a failed query also comes back empty.
+        if (type === 'member' && records.length > 0) {
+          const live = new Set(records.filter((r) => r?.id).map((r) => notionNormalizeId(r.id)))
+          const stale = (await resourceStorage.getKeys()).filter((key) => !live.has(key))
+          await Promise.allSettled(stale.map((key) => resourceStorage.removeItem(key)))
+        }
       } else {
         console.warn(`Notion fetch failed for ${type}:`, res.reason)
       }

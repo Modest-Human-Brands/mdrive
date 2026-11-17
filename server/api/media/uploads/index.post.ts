@@ -4,6 +4,7 @@ import { randomUUID } from 'uncrypto'
 import z from 'zod'
 import type { Resource } from '~/server/types'
 
+import { assertProjectAccess } from '~/server/utils/org-access'
 import notionNormalizeId from '~/server/utils/notion-normalize-id'
 import r2Drive from '~/server/utils/r2-drive'
 import r2GetPresignedUploadUrl from '~/server/utils/r2-get-presigned-upload-url'
@@ -13,6 +14,8 @@ const uploadSchema = z.object({ projectId: z.string(), files: z.array(z.object({
 export default defineEventHandler(async (event) => {
   try {
     const { projectId, files } = await readValidatedBody(event, uploadSchema)
+    await assertProjectAccess(event, projectId)
+
     const orgId = event.req.headers.get('x-org-id')
     if (!orgId) {
       throw new HTTPError({ statusCode: 400, statusMessage: 'Missing x-org-id header' })

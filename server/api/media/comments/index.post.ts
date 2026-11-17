@@ -2,6 +2,7 @@ import { defineEventHandler, readValidatedBody, HTTPError } from 'nitro/h3'
 import { useStorage } from 'nitro/storage'
 import { randomUUID } from 'uncrypto'
 import { z } from 'zod'
+import { assertMediaAccess } from '~/server/utils/org-access'
 
 const commentSchema = z.object({
   mediaIds: z.array(z.string()).min(1, 'Must provide at least one media ID'),
@@ -23,6 +24,8 @@ const commentSchema = z.object({
 export default defineEventHandler(async (event) => {
   try {
     const { mediaIds, parentId, text, coordinates, author } = await readValidatedBody(event, commentSchema)
+
+    await assertMediaAccess(event, mediaIds)
 
     const commentStorage = useStorage('data:comment')
     const createdComments = []

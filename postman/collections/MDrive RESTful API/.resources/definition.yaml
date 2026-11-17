@@ -59,3 +59,6 @@ auth:
       value: '{{api_key}}'
     - key: in
       value: header
+headers:
+  x-org-id: '{{org_id}}'
+  x-user-id: '{{user_id}}'

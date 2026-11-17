@@ -4,6 +4,7 @@ import { z } from 'zod'
 import type { Resource } from '~/server/types'
 import mediaUrl from '~/server/utils/media-url'
 import mediaMeta from '~/server/utils/media-meta'
+import { assertProjectAccess } from '~/server/utils/org-access'
 import notionNormalizeId from '~/server/utils/notion-normalize-id'
 import notionTextStringify from '~/server/utils/notion-text-stringify'
 
@@ -26,6 +27,8 @@ const statusMap = {
 export default defineEventHandler(async (event) => {
   try {
     const projectId = notionNormalizeId(getRouterParam(event, 'projectId')!.toString().replace(/,$/, ''))
+
+    await assertProjectAccess(event, projectId)
 
     const query = await getValidatedQuery(event, (data) => querySchema.parse(data))
     const { status, sort, page, limit } = query

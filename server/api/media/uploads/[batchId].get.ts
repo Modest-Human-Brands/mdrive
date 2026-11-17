@@ -1,6 +1,7 @@
 import { defineEventHandler, getValidatedRouterParams, HTTPError } from 'nitro/h3'
 import { useStorage } from 'nitro/storage'
 import { z } from 'zod'
+import { assertProjectAccess } from '~/server/utils/org-access'
 
 const pathParamsSchema = z.object({ batchId: z.string() })
 
@@ -24,6 +25,8 @@ export default defineEventHandler(async (event) => {
         statusMessage: 'Upload batch not found',
       })
     }
+
+    await assertProjectAccess(event, (batchData as { projectId: string }).projectId)
 
     return batchData
   } catch (error: any) {

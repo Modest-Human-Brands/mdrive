@@ -19,7 +19,7 @@ export type Resolution = (typeof resolutions)[number]
 export type Category = string
 export type AspectRatio = '16:9' | '3:2' | '4:3' | '1:1' | '3:4' | '2:3' | '9:16'
 
-export const resourceTypes = ['organization', 'project', 'media', 'contact'] as const
+export const resourceTypes = ['organization', 'project', 'media', 'contact', 'member'] as const
 
 export type ResourceType = (typeof resourceTypes)[number]
 
@@ -30,6 +30,7 @@ export interface ResourceRecordMap {
   project: NotionProject
   media: NotionMedia
   contact: NotionContact
+  member: NotionMember
 }
 
 export interface Resource<T extends ResourceType = ResourceType> {
@@ -193,6 +194,19 @@ export interface NotionOrganization {
       type: 'relation'
       relation: { id: string }[]
     }
+  }
+}
+
+/** Organization Member row: links a User page to an Organization page. */
+export interface NotionMember {
+  id: string
+  created_time: string
+  last_edited_time: string
+  properties: {
+    Name?: { title: { plain_text: string }[] }
+    Status?: { status: { name: string } | null }
+    Organization?: { relation: { id: string }[] }
+    User?: { relation: { id: string }[] }
   }
 }
 

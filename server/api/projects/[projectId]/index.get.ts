@@ -2,11 +2,14 @@ import { defineEventHandler, getRouterParam, HTTPError } from 'nitro/h3'
 import { useStorage } from 'nitro/storage'
 import type { Resource } from '~/server/types'
 import formatBytes from '~/server/utils/format-bytes'
+import { assertProjectAccess } from '~/server/utils/org-access'
 import notionNormalizeId from '~/server/utils/notion-normalize-id'
 
 export default defineEventHandler(async (event) => {
   try {
     const projectId = notionNormalizeId(getRouterParam(event, 'projectId')!.toString().replace(/,$/, ''))
+
+    await assertProjectAccess(event, projectId)
 
     const projectStorage = useStorage<Resource<'project'>>('data:resource:project')
     const mediaStorage = useStorage<Resource<'media'>>('data:resource:media')

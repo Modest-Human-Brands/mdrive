@@ -2,6 +2,8 @@ import { defineEventHandler, getValidatedQuery, HTTPError } from 'nitro/h3'
 import { useStorage } from 'nitro/storage'
 import { z } from 'zod'
 import type { Resource } from '~/server/types'
+import notionNormalizeId from '~/server/utils/notion-normalize-id'
+import { orgProjectKeys } from '~/server/utils/org-access'
 import notionTextStringify from '~/server/utils/notion-text-stringify'
 
 const querySchema = z.object({
@@ -43,7 +45,8 @@ export default defineEventHandler(async (event) => {
       // );
     }
 
-    const projects = filterByOrg(rawProjects)
+    const ownProjects = await orgProjectKeys(event)
+    const projects = filterByOrg(rawProjects).filter((project) => ownProjects.has(notionNormalizeId(project.id)))
     const medias = filterByOrg(rawMedia)
     const clients = filterByOrg(rawClients)
 

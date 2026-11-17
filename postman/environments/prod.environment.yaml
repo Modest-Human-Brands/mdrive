@@ -10,6 +10,11 @@ values:
     enabled: true
     type: default
     description: Organization slug sent as the x-org-id header
+  - key: user_id
+    value: ''
+    enabled: true
+    type: default
+    description: Notion User page id of a Verified or Active member of the organization, sent as the x-user-id header
   - key: api_key
     value: ''
     enabled: true

@@ -1,6 +1,7 @@
 import { defineEventHandler, readValidatedBody, HTTPError } from 'nitro/h3'
 import { useStorage } from 'nitro/storage'
 import { z } from 'zod'
+import { assertMediaAccess } from '~/server/utils/org-access'
 
 const querySchema = z.object({
   mediaIds: z.array(z.string()).min(1, 'Must provide at least one media ID'),
@@ -9,6 +10,8 @@ const querySchema = z.object({
 export default defineEventHandler(async (event) => {
   try {
     const { mediaIds } = await readValidatedBody(event, querySchema)
+
+    await assertMediaAccess(event, mediaIds)
 
     const commentStorage = useStorage('data:comment')
     const commentKeys = await commentStorage.getKeys()

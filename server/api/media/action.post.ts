@@ -2,6 +2,7 @@ import { defineEventHandler, readValidatedBody, HTTPError } from 'nitro/h3'
 import { z } from 'zod'
 import { useStorage } from 'nitro/storage'
 import notion from '~/server/utils/notion'
+import { assertMediaAccess, assertProjectAccess } from '~/server/utils/org-access'
 import notionNormalizeId from '~/server/utils/notion-normalize-id'
 import type { Resource } from '~/server/types'
 
@@ -25,6 +26,9 @@ const actionSchema = z.discriminatedUnion('action', [
 export default defineEventHandler(async (event) => {
   try {
     const body = await readValidatedBody(event, (data) => actionSchema.parse(data))
+
+    await assertMediaAccess(event, body.mediaIds)
+    if (body.action === 'move') await assertProjectAccess(event, body.params.targetProjectId)
 
     switch (body.action) {
       // ==========================================

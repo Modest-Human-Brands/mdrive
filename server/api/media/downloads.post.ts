@@ -2,6 +2,7 @@ import { defineEventHandler, readValidatedBody, HTTPError } from 'nitro/h3'
 import { useStorage } from 'nitro/storage'
 import { z } from 'zod'
 import type { NotionMedia, Resource } from '~/server/types'
+import { assertMediaAccess, assertProjectAccess } from '~/server/utils/org-access'
 import notionNormalizeId from '~/server/utils/notion-normalize-id'
 import r2Drive from '~/server/utils/r2-drive'
 import notionTextStringify from '~/server/utils/notion-text-stringify'
@@ -41,6 +42,8 @@ export default defineEventHandler(async (event) => {
   try {
     const { projectId, mediaIds, params } = await readValidatedBody(event, (data) => downloadSchema.parse(data))
 
+    await assertProjectAccess(event, projectId)
+
     const orgId = event.req.headers.get('x-org-id')
     if (!orgId) {
       throw new HTTPError({ statusCode: 400, statusMessage: 'Missing x-org-id header' })
@@ -69,6 +72,12 @@ export default defineEventHandler(async (event) => {
     if (targetMedia.length === 0) {
       throw new HTTPError({ statusCode: 404, statusMessage: 'No media found matching criteria' })
     }
+
+    // Every file must belong to the caller's organization, whichever way it was selected.
+    await assertMediaAccess(
+      event,
+      targetMedia.map(({ id }) => id)
+    )
 
     const expiresInSeconds = 3600
 

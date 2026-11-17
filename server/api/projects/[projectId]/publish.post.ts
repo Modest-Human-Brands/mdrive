@@ -4,6 +4,7 @@ import { z } from 'zod'
 
 import type { Resource } from '~/server/types'
 import notion from '~/server/utils/notion'
+import { assertProjectAccess } from '~/server/utils/org-access'
 import notionNormalizeId from '~/server/utils/notion-normalize-id'
 
 const publishSchema = z.object({
@@ -13,6 +14,8 @@ const publishSchema = z.object({
 export default defineEventHandler(async (event) => {
   try {
     const projectId = notionNormalizeId(getRouterParam(event, 'projectId')!.toString().replace(/,$/, ''))
+
+    await assertProjectAccess(event, projectId)
 
     const { notify } = await readValidatedBody(event, publishSchema)
 

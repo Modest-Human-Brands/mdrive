@@ -5,6 +5,7 @@ import { z } from 'zod'
 
 import type { NotionDB, Resource } from '~/server/types'
 import notion from '~/server/utils/notion'
+import { assertProjectAccess } from '~/server/utils/org-access'
 import notionNormalizeId from '~/server/utils/notion-normalize-id'
 import notionQueryDb from '~/server/utils/notion-query-db'
 
@@ -26,6 +27,8 @@ type MediaPage = { properties: { Status?: { status?: { name?: string } } } }
 export default defineEventHandler(async (event) => {
   try {
     const projectId = notionNormalizeId(getRouterParam(event, 'projectId')!.toString().replace(/,$/, ''))
+    await assertProjectAccess(event, projectId)
+
     const { note } = await readValidatedBody(event, (data) => reviewSchema.parse(data))
 
     const project = (await useStorage<Resource<'project'>>('data:resource:project').getItem(projectId))?.record

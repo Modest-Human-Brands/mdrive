@@ -2,6 +2,7 @@ import { defineEventHandler, getRouterParam, HTTPError } from 'nitro/h3'
 import { useStorage } from 'nitro/storage'
 
 import type { Resource } from '~/server/types'
+import { assertMediaAccess } from '~/server/utils/org-access'
 import mediaUrl from '~/server/utils/media-url'
 import mediaMeta from '~/server/utils/media-meta'
 import notionNormalizeId from '~/server/utils/notion-normalize-id'
@@ -11,6 +12,8 @@ import notionTextStringify from '~/server/utils/notion-text-stringify'
 export default defineEventHandler(async (event) => {
   try {
     const mediaId = notionNormalizeId(getRouterParam(event, 'mediaId')!.toString())
+
+    await assertMediaAccess(event, [mediaId])
 
     const media = (await useStorage<Resource<'media'>>('data:resource:media').getItem(mediaId))?.record
 

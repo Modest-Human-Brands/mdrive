@@ -141,6 +141,8 @@ Configuration is managed via environment variables defined in `.env`:
 
 All `/api/**` and `/webhook/**` endpoints (except `GET /api/health`) require an `x-api-key` header matching `NITRO_MDRIVE_PRIVATE_SERVER_VALIDATION_KEY`: missing key returns `401`, wrong key `403`, and an unset server key `500`. `/media/**` is public.
 
+Every `/api/**` endpoint (not `/webhook/**`) also requires `x-org-id` (the organization slug) and `x-user-id` (the Notion User page id). The user must have a **Verified** or **Active** row in the Organization Member database for that organization. A missing header returns `400`; an unknown organization, an unknown user, or a user who is not a verified or active member returns `403`. Set the member database id as `member` in `NOTION_DB_ID`; membership is synced with the other resources, so changes in Notion take effect after the next sync.
+
 All endpoints return JSON responses unless streaming media content. Route parameters and request bodies are strictly validated with [Zod](https://zod.dev).
 
 ```
